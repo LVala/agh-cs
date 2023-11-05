@@ -1,0 +1,864 @@
+\documentclass{article}
+
+\usepackage{polski}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{multirow}
+
+\title{Rozwiązywanie układów równań liniowych metodami bezpośrednimi}
+\author{\textbf{Łukasz Wala}\\
+    \textit{AGH, Wydział Informatyki, Elektroniki i Telekomunikacji} \\
+    \textit{Metody Obliczeniowe w Nauce i Technice 2021/2022}}
+\date{Kraków, \today}
+
+\begin{document}
+\maketitle
+
+\section{Problem 1}
+\subsection{Opis problemu}
+Dany jest układ równań liniowych \textbf{Ax}=\textbf{b}.
+Elementy macierzy \textbf{A} o wymiarze $n$\,x\,$n$ są określone wzorem:
+$$
+\begin{cases}
+    a_{1j}=1\\
+    a_{ij}=\frac{1}{i+j-1} \ dla \ i \ne j
+\end{cases}i,j=1,...,n
+$$
+Za wektor \textbf{x} przyjęta zostanie dowolna $n$-elementowa permutacja ze zbioru \{1,-1\} i obliczony zostanie
+wektor \textbf{b}. Następnie metodą eliminacji Gaussa rozwiązany zostanie układ równań liniowych \textbf{Ax}=\textbf{b}
+(przyjmując jako niewiadomą wektor \textbf{x}). Przyjęte zostaną różne precyjze dla znanych wartości macierzy \textbf{A} i
+wektora \textbf{b}. Sprawdzone zostanie to, jak błędy zaokrągleń zaburzają rozwiązanie dla różnych rozmiarów układu
+(porównany \textbf{x} obliczony z \textbf{x} zadanym). Eksperyment przeprowadzony zostanie dla różnych rozmiarów układu.
+
+\subsection{Opracowanie problemu}
+Program użyty do rozwiązania układu został napisany w języku Python z użyciem pakietu numpy.
+
+Zakres użytego $n$ wynosi 3-100, natomiast, w celu uzyskania różnych precyzji, zostaną użyte typy float128, float64 oraz float32
+(128 bitów, 64 bity oraz 32 bitów, typy zmiennoprzecinkowe). Przyjęty wektor \textbf{x} składa się naprzemiennie z 1 oraz -1, czyli
+\textbf{x}$=[1,-1,1,-1,...]$.
+
+Poniżej wyniki dla wartości 3-18 $n$ z użyciem float64:
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{11cm}|}
+\hline
+$n$ & Wynik (float64)\\ \hline
+3 & [ 1. -1.  1.] \\ \hline
+4 & [ 1. -1.  1. -1.] \\ \hline
+5 & [ 1. -1.  1. -1.  1.] \\ \hline
+6 & [ 1. -1.  1. -1.  1. -1.] \\ \hline
+7 & [ 1.     -1.      1.     -0.99999999  0.99999999 -0.99999999  1. ] \\ \hline
+8 & [ 1.         -1.          1.00000001 -1.00000003  1.00000007 -1.00000008 1.00000005 -1.00000001] \\ \hline
+9 & [ 1.         -1.          1.00000002 -1.00000008  1.00000022 -1.00000034 1.00000031 -1.00000015  1.00000003] \\ \hline
+10 & [ 1.         -0.99999992  0.99999887 -0.999992    0.99996863 -0.99992652 0.99989471 -0.99990954  0.9999572  -0.99999143] \\ \hline
+11 & [ 0.99999997 -0.99999848  0.99997297 -0.99976817  0.99887436 -0.99664975 0.99366282 -0.99235204  0.99429537 -0.99760317  0.99956614] \\ \hline
+12 & [ 0.99999941 -0.99996221  0.99919827 -0.99172934  0.95111984 -0.81988143 0.56753005 -0.31190968  0.28013607 -0.52390499  0.81951835 -0.97011435] \\ \hline
+13 & [  0.99999778  -0.99983381   0.99588177  -0.95002628   0.6492147
+0.55558381  -3.57758546   8.16116812 -11.53222833  10.53875693
+-5.83889397   1.35691714   0.6410476 ] \\ \hline
+14 & [  0.99999839  -0.99987809   0.99693457  -0.96208463   0.72726558
+0.24775735  -2.82147498   7.05683998 -10.81750725  10.99258477
+-7.21472848   2.59779619   0.10075086  -0.90425428] \\ \hline
+15 & [ 1.00000032 -1.00002608  1.00068109 -1.0084821   1.05859506 -1.23642266
+1.52425818 -1.31770342 -0.63773969  4.60311654 -8.06911186  7.84695378
+-4.30073459  0.80508738  0.73152805] \\ \hline
+16 & [  1.00000035  -1.00002873   1.00077369  -1.0099144    1.07044155
+-1.2924074    1.66629056  -1.39635283  -1.36182391   7.41476733
+-13.5730076   14.63721333  -9.78616429   3.63410525  -0.11663269
+-0.88726018] \\ \hline
+17 & [  0.99999998  -1.00000181   1.00012819  -1.00256848   1.02437038
+-1.12426363   1.32037494  -1.09632243  -1.12225943   6.55223303
+-12.60591686  13.4139281   -7.23211203  -0.09782497   2.92766818
+-2.18587769   1.22844453] \\ \hline
+18 & [  1.00000009  -1.00000875   1.00027248  -1.00388918   1.029806
+  -1.12729424   1.25609572  -0.81278282  -1.66686582   6.95901598
+ -12.29735709  12.50041866  -6.48195112  -0.38410709   3.12164386
+  -2.45497509   1.40118285  -1.03920443] \\ \hline
+\end{tabular}
+\caption{Wyniki dla wartości 3-18 $n$}
+\end{table}
+
+Już dla $n=12$ widać istotne błędy, które wraz ze wzrastającym $b$ będą stawały się coraz bardziej poważne.
+Poniżej tabele błędów dla wszystkich badanych wartości i precyzji (błąd - norma euklidesowa wektora prawdziwych wyników i tego
+uzyskanego za pomocą eliminacji Gaussa):
+
+\newpage
+\thispagestyle{empty}
+
+\begin{table}[H]
+\parbox{.45\linewidth}{
+\hspace*{-2.4cm}
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & float32 & float64 & float128 \\ \hline
+3 & 3.34531e-06 & 0.00000e+00 & 0.00000e+00 \\ \hline
+4 & 6.64652e-15 & 3.01871e-13 & 0.00000e+00 \\ \hline
+5 & 3.36947e-04 & 9.22938e-12 & 4.06851e-12 \\ \hline
+6 & 5.44100e-11 & 3.63798e-10 & 1.08591e-11 \\ \hline
+7 & 2.21917e+00 & 1.36093e-08 & 1.80863e-09 \\ \hline
+8 & 1.97221e+01 & 1.20335e-07 & 6.03675e-09 \\ \hline
+9 & 4.94785e+01 & 5.40051e-07 & 1.62591e-06 \\ \hline
+10 & 1.81574e+01 & 1.66203e-04 & 2.23585e-05 \\ \hline
+11 & 1.37795e+01 & 1.22341e-02 & 1.51898e-03 \\ \hline
+12 & 4.69258e+00 & 1.21398e+00 & 5.23169e-02 \\ \hline
+13 & 8.38654e+00 & 2.12151e+01 & 5.62548e-01 \\ \hline
+14 & 5.70722e+00 & 2.11156e+01 & 3.72763e-01 \\ \hline
+15 & 1.35352e+01 & 1.50485e+01 & 6.50496e-01 \\ \hline
+16 & 4.89353e+01 & 2.59432e+01 & 1.17698e+00 \\ \hline
+17 & 8.20822e+01 & 2.29849e+01 & 2.33258e+00 \\ \hline
+18 & 7.33821e+01 & 2.21990e+01 & 1.50270e+00 \\ \hline
+19 & 9.48898e+01 & 8.53660e+01 & 2.24009e+01 \\ \hline
+20 & 2.65256e+02 & 8.71401e+02 & 8.78090e+00 \\ \hline
+21 & 5.62076e+01 & 5.86659e+01 & 8.24051e+00 \\ \hline
+22 & 5.08758e+01 & 5.29518e+01 & 4.86432e+00 \\ \hline
+23 & 4.39705e+01 & 4.70098e+01 & 4.75505e+00 \\ \hline
+24 & 1.80496e+02 & 1.23774e+02 & 9.36016e+00 \\ \hline
+25 & 2.96316e+02 & 2.69255e+02 & 1.50937e+01 \\ \hline
+26 & 2.56446e+02 & 1.11393e+02 & 1.35080e+01 \\ \hline
+27 & 2.43912e+02 & 1.24288e+02 & 3.16106e+01 \\ \hline
+28 & 1.48963e+03 & 1.57776e+03 & 7.67399e+01 \\ \hline
+29 & 1.05603e+02 & 4.02865e+02 & 2.22652e+01 \\ \hline
+30 & 8.07414e+01 & 1.89246e+02 & 6.82841e+00 \\ \hline
+31 & 8.96439e+01 & 2.24508e+02 & 3.83671e+00 \\ \hline
+32 & 4.76402e+01 & 6.72210e+01 & 6.23303e+00 \\ \hline
+33 & 5.41734e+01 & 7.39117e+01 & 1.14283e+01 \\ \hline
+34 & 5.92480e+01 & 5.53441e+02 & 4.80933e+01 \\ \hline
+35 & 6.07805e+01 & 5.19503e+02 & 4.10183e+01 \\ \hline
+36 & 2.16845e+02 & 3.53450e+02 & 3.31293e+01 \\ \hline
+37 & 1.52330e+02 & 3.91273e+02 & 1.13820e+01 \\ \hline
+38 & 3.07429e+03 & 3.77185e+02 & 2.47144e+01 \\ \hline
+39 & 2.34106e+02 & 1.87523e+02 & 1.70904e+01 \\ \hline
+40 & 3.75507e+02 & 2.70230e+02 & 1.74852e+01 \\ \hline
+41 & 2.92789e+02 & 5.55432e+02 & 3.25176e+01 \\ \hline
+42 & 1.26124e+02 & 3.19532e+02 & 1.45562e+01 \\ \hline
+43 & 1.53077e+02 & 3.53136e+02 & 1.21748e+01 \\ \hline
+44 & 1.44788e+02 & 3.75632e+02 & 1.37852e+01 \\ \hline
+45 & 1.36310e+02 & 4.01859e+02 & 9.50281e+00 \\ \hline
+46 & 1.80565e+02 & 1.08220e+03 & 2.68951e+01 \\ \hline
+47 & 6.36151e+02 & 4.67922e+03 & 4.85818e+01 \\ \hline
+48 & 5.65476e+02 & 1.75233e+03 & 9.09009e+00 \\ \hline
+49 & 3.10694e+03 & 5.92046e+03 & 1.69193e+02 \\ \hline
+50 & 5.09456e+02 & 2.46086e+02 & 7.41959e+00 \\ \hline
+51 & 6.81772e+02 & 8.57508e+02 & 3.73456e+01 \\ \hline
+\end{tabular}
+\hspace*{0cm}
+}
+\parbox{.45\linewidth}{
+\hspace*{0cm}
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & float128 & float64 & float32 \\ \hline
+52 & 5.14735e+02 & 1.61072e+04 & 9.53346e+02 \\ \hline
+53 & 4.56655e+02 & 2.58046e+02 & 1.80353e+01 \\ \hline
+54 & 6.67503e+02 & 5.96323e+02 & 1.99145e+01 \\ \hline
+55 & 4.37564e+02 & 5.90284e+02 & 1.11223e+01 \\ \hline
+56 & 5.09443e+02 & 1.24163e+02 & 1.10942e+02 \\ \hline
+57 & 6.21070e+02 & 1.01673e+02 & 1.37209e+01 \\ \hline
+58 & 5.34945e+02 & 1.20849e+03 & 5.19018e+01 \\ \hline
+59 & 3.41757e+02 & 9.46613e+02 & 4.18553e+01 \\ \hline
+60 & 2.17668e+02 & 2.75634e+02 & 2.14181e+01 \\ \hline
+61 & 5.06385e+02 & 2.68919e+02 & 6.71575e+01 \\ \hline
+62 & 2.74899e+02 & 1.09973e+03 & 8.14264e+01 \\ \hline
+63 & 2.65498e+03 & 4.24254e+03 & 3.31771e+02 \\ \hline
+64 & 1.84302e+02 & 3.73795e+02 & 2.33192e+02 \\ \hline
+65 & 3.48078e+02 & 3.79244e+02 & 8.67555e+01 \\ \hline
+66 & 1.65714e+02 & 6.00618e+02 & 1.01882e+02 \\ \hline
+67 & 2.50903e+02 & 6.39984e+02 & 5.68154e+01 \\ \hline
+68 & 3.28770e+02 & 5.05802e+02 & 5.60500e+01 \\ \hline
+69 & 2.70242e+02 & 1.28675e+03 & 1.43560e+02 \\ \hline
+70 & 3.16937e+02 & 9.68115e+02 & 6.86839e+01 \\ \hline
+71 & 2.63627e+02 & 2.09254e+02 & 3.09189e+01 \\ \hline
+72 & 4.22425e+02 & 4.05753e+02 & 4.63669e+01 \\ \hline
+73 & 1.91797e+02 & 4.11489e+02 & 3.42964e+01 \\ \hline
+74 & 2.06689e+02 & 2.38284e+02 & 8.09815e+01 \\ \hline
+75 & 2.03516e+02 & 7.10297e+02 & 1.62780e+02 \\ \hline
+76 & 3.72820e+02 & 4.12513e+02 & 2.99406e+01 \\ \hline
+77 & 4.92432e+02 & 1.87440e+02 & 2.79378e+01 \\ \hline
+78 & 7.22018e+02 & 2.03857e+02 & 2.57488e+01 \\ \hline
+79 & 4.28204e+02 & 6.78755e+02 & 3.58451e+01 \\ \hline
+80 & 3.30165e+02 & 5.08628e+02 & 3.48783e+01 \\ \hline
+81 & 6.74881e+02 & 6.06770e+02 & 4.10914e+01 \\ \hline
+82 & 4.24376e+02 & 7.73650e+02 & 5.92223e+01 \\ \hline
+83 & 1.05389e+03 & 1.17550e+03 & 1.05222e+02 \\ \hline
+84 & 2.74024e+02 & 1.16940e+04 & 3.85955e+02 \\ \hline
+85 & 2.64005e+03 & 1.03478e+04 & 1.20177e+02 \\ \hline
+86 & 3.03358e+02 & 1.24309e+04 & 2.93697e+02 \\ \hline
+87 & 3.64647e+02 & 1.50364e+04 & 1.45779e+02 \\ \hline
+88 & 2.93164e+02 & 6.09119e+04 & 7.15888e+01 \\ \hline
+89 & 3.03613e+02 & 1.41214e+03 & 1.00808e+02 \\ \hline
+90 & 3.00330e+02 & 1.76003e+03 & 6.43347e+01 \\ \hline
+91 & 2.96360e+02 & 9.43939e+02 & 4.96421e+01 \\ \hline
+92 & 3.95333e+02 & 1.68947e+03 & 5.39511e+01 \\ \hline
+93 & 7.05083e+02 & 1.23000e+03 & 3.33221e+01 \\ \hline
+94 & 7.66381e+02 & 1.16441e+03 & 4.16179e+01 \\ \hline
+95 & 1.11746e+03 & 1.11327e+03 & 4.31873e+01 \\ \hline
+96 & 1.51410e+03 & 1.93032e+04 & 5.98646e+02 \\ \hline
+97 & 5.56434e+02 & 9.62075e+02 & 3.08990e+01 \\ \hline
+98 & 5.48100e+02 & 1.33434e+03 & 6.69423e+01 \\ \hline
+99 & 7.75475e+03 & 1.52907e+03 & 9.06394e+01 \\ \hline
+100 & 3.35457e+03 & 3.77706e+03 & 1.63594e+02 \\ \hline
+\end{tabular}
+\hspace*{-2.5cm}
+}
+\caption{Błędy}
+\end{table}
+
+Błędy powiększają się wraz ze wzrastającym rozmiarem układu jak rownież z malejącą prezycją użytego typu, przy czym należy
+zauważyć, że błąd wynikający z precyzji jest znacznie wiekszy dla typów float32 oraz float 64 niż dla float128. Następnym krokiem
+będzie porównanie wyników w problemie drugim z tymi uzyskanymi tutaj.
+
+\section{Problem 2}
+\subsection{Opis problemu}
+Eksperyment analogiczny do problemu 1 zostanie przeprowadzony dla macierzy zadanej wzorem:
+$$
+\begin{cases}
+    a_{1j}=\frac{2i}{j} \ dla \ j \ge i\\
+    a_{ij}=a_{ij} \ dla \ j \le i
+\end{cases}i,j=1,...,n
+$$
+
+Wyniki zostaną porównane z tymi w problemie 1. Zostanie sprawdzone uwarunkowanie obu układów.
+
+\subsection{Opracowanie problemu}
+Zakres badanych $n$, precyzji oraz uzyty wektor \textbf{x} są identyczne jak w problemie 1.
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+$n$ & Wynik (float64) \\ \hline
+3 & [ 1. -1.  1.] \\ \hline
+4 & [ 1. -1.  1. -1.] \\ \hline
+5 & [ 1. -1.  1. -1.  1.] \\ \hline
+6 & [ 1. -1.  1. -1.  1. -1.] \\ \hline
+7 & [ 1. -1.  1. -1.  1. -1.  1.] \\ \hline
+8 & [ 1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+9 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1.] \\ \hline
+10 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+11 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1.] \\ \hline
+12 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+13 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1.] \\ \hline
+14 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+15 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1.] \\ \hline
+16 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+17 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1.] \\ \hline
+18 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+\end{tabular}
+\caption{Wyniki dla wartości 3-18 $n$}
+\end{table}
+
+Wszystkie uzyskane wyniki w tym zakresie są na tyle dobre (tzn. mają na tyle dużo zer po przecinku),
+że numpy nie pokazuje ich rozwinięcia dziesiętnego, w odróżnieniu od problemu 1, gdzie widać było ewidentne
+niedokładności.
+
+\newpage
+\thispagestyle{empty}
+
+\begin{table}[H]
+\parbox{.45\linewidth}{
+\hspace*{-2.4cm}
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & float32 & float64 & float128 \\ \hline
+3 & 6.86245e-08 & 3.14018e-16 & 3.14018e-16 \\ \hline
+4 & 4.44267e-08 & 2.48253e-16 & 5.66105e-16 \\ \hline
+5 & 1.07495e-07 & 4.15407e-16 & 4.96507e-16 \\ \hline
+6 & 1.50075e-07 & 9.74217e-16 & 6.47366e-16 \\ \hline
+7 & 2.09061e-07 & 1.69468e-15 & 7.77156e-16 \\ \hline
+8 & 1.39362e-06 & 4.67218e-15 & 2.29416e-15 \\ \hline
+9 & 1.39735e-06 & 3.31025e-15 & 1.42611e-15 \\ \hline
+10 & 1.40241e-06 & 3.08274e-15 & 5.30473e-15 \\ \hline
+11 & 1.58287e-06 & 4.42142e-15 & 6.66689e-15 \\ \hline
+12 & 4.87964e-06 & 1.98040e-14 & 1.08353e-14 \\ \hline
+13 & 5.41459e-06 & 2.20079e-14 & 9.17665e-15 \\ \hline
+14 & 5.45612e-06 & 2.27677e-14 & 1.17500e-14 \\ \hline
+15 & 5.68328e-06 & 2.83611e-14 & 1.40438e-14 \\ \hline
+16 & 8.61665e-06 & 3.80102e-14 & 1.42723e-14 \\ \hline
+17 & 8.61734e-06 & 3.71618e-14 & 1.41234e-14 \\ \hline
+18 & 8.76560e-06 & 3.65198e-14 & 1.23634e-14 \\ \hline
+19 & 8.95563e-06 & 3.88935e-14 & 1.32065e-14 \\ \hline
+20 & 1.26324e-05 & 3.80900e-14 & 1.55973e-14 \\ \hline
+21 & 1.27579e-05 & 3.65030e-14 & 1.69886e-14 \\ \hline
+22 & 1.32394e-05 & 4.75961e-14 & 1.57937e-14 \\ \hline
+23 & 1.32357e-05 & 4.25638e-14 & 1.89406e-14 \\ \hline
+24 & 1.77992e-05 & 3.68189e-14 & 2.35490e-14 \\ \hline
+25 & 2.05828e-05 & 3.90851e-14 & 2.60590e-14 \\ \hline
+26 & 1.80582e-05 & 3.97499e-14 & 3.78837e-14 \\ \hline
+27 & 1.96227e-05 & 4.30520e-14 & 4.32887e-14 \\ \hline
+28 & 3.37062e-05 & 1.01729e-13 & 4.83767e-14 \\ \hline
+29 & 3.51362e-05 & 1.22073e-13 & 6.59737e-14 \\ \hline
+30 & 3.90795e-05 & 9.93568e-14 & 6.37943e-14 \\ \hline
+31 & 4.28118e-05 & 1.23333e-13 & 8.47986e-14 \\ \hline
+32 & 3.82589e-05 & 1.22503e-13 & 1.03770e-13 \\ \hline
+33 & 3.82829e-05 & 1.20980e-13 & 1.00354e-13 \\ \hline
+34 & 3.82761e-05 & 1.27744e-13 & 8.96049e-14 \\ \hline
+35 & 3.82684e-05 & 1.25167e-13 & 8.98755e-14 \\ \hline
+36 & 2.76824e-05 & 1.81115e-13 & 9.92374e-14 \\ \hline
+37 & 2.75514e-05 & 1.78416e-13 & 8.58149e-14 \\ \hline
+38 & 3.09757e-05 & 1.91015e-13 & 8.43823e-14 \\ \hline
+39 & 3.18148e-05 & 1.75834e-13 & 8.63363e-14 \\ \hline
+40 & 7.56912e-05 & 2.56295e-13 & 9.07217e-14 \\ \hline
+41 & 7.90041e-05 & 2.55501e-13 & 8.50089e-14 \\ \hline
+42 & 7.61771e-05 & 2.56017e-13 & 9.76102e-14 \\ \hline
+43 & 7.65123e-05 & 2.59007e-13 & 9.94367e-14 \\ \hline
+44 & 7.34220e-05 & 2.20919e-13 & 1.02333e-13 \\ \hline
+45 & 7.31798e-05 & 2.21368e-13 & 1.19101e-13 \\ \hline
+46 & 8.38282e-05 & 2.43778e-13 & 1.46323e-13 \\ \hline
+47 & 1.03189e-04 & 3.02347e-13 & 1.48848e-13 \\ \hline
+48 & 1.12287e-04 & 3.16843e-13 & 1.58636e-13 \\ \hline
+49 & 1.11491e-04 & 3.23690e-13 & 1.72794e-13 \\ \hline
+50 & 1.13042e-04 & 3.46057e-13 & 1.67102e-13 \\ \hline
+51 & 1.14222e-04 & 3.58384e-13 & 1.85238e-13 \\ \hline
+\end{tabular}
+\hspace*{0cm}
+}
+\parbox{.45\linewidth}{
+\hspace*{0cm}
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & float128 & float64 & float32 \\ \hline
+52 & 1.52723e-04 & 3.67188e-13 & 2.47585e-13 \\ \hline
+53 & 1.54651e-04 & 3.71622e-13 & 2.44301e-13 \\ \hline
+54 & 1.52182e-04 & 3.95670e-13 & 2.80490e-13 \\ \hline
+55 & 1.54589e-04 & 4.47478e-13 & 3.02780e-13 \\ \hline
+56 & 2.20486e-04 & 5.07994e-13 & 3.29484e-13 \\ \hline
+57 & 2.20375e-04 & 5.18223e-13 & 3.51037e-13 \\ \hline
+58 & 2.23116e-04 & 5.38007e-13 & 3.61192e-13 \\ \hline
+59 & 2.30464e-04 & 5.32264e-13 & 3.53027e-13 \\ \hline
+60 & 2.89830e-04 & 8.55487e-13 & 3.90212e-13 \\ \hline
+61 & 2.90913e-04 & 8.64971e-13 & 3.94910e-13 \\ \hline
+62 & 2.89842e-04 & 8.52088e-13 & 4.01676e-13 \\ \hline
+63 & 2.91242e-04 & 8.53760e-13 & 4.09343e-13 \\ \hline
+64 & 2.89792e-04 & 1.02174e-12 & 3.75456e-13 \\ \hline
+65 & 2.89793e-04 & 1.08640e-12 & 5.19077e-13 \\ \hline
+66 & 3.02815e-04 & 1.20444e-12 & 5.83299e-13 \\ \hline
+67 & 3.12182e-04 & 1.27659e-12 & 6.21968e-13 \\ \hline
+68 & 3.23898e-04 & 8.29059e-13 & 6.88447e-13 \\ \hline
+69 & 3.25577e-04 & 8.79906e-13 & 7.48081e-13 \\ \hline
+70 & 3.63193e-04 & 9.25090e-13 & 8.04045e-13 \\ \hline
+71 & 3.60864e-04 & 9.76631e-13 & 8.66095e-13 \\ \hline
+72 & 3.67436e-04 & 1.20634e-12 & 8.94100e-13 \\ \hline
+73 & 3.78367e-04 & 1.20252e-12 & 9.29830e-13 \\ \hline
+74 & 3.80380e-04 & 1.20104e-12 & 9.24748e-13 \\ \hline
+75 & 3.79370e-04 & 1.20343e-12 & 9.47747e-13 \\ \hline
+76 & 4.17660e-04 & 1.89808e-12 & 9.03211e-13 \\ \hline
+77 & 4.24850e-04 & 1.88248e-12 & 8.68586e-13 \\ \hline
+78 & 4.21848e-04 & 1.96682e-12 & 8.98199e-13 \\ \hline
+79 & 4.21705e-04 & 1.96288e-12 & 9.04314e-13 \\ \hline
+80 & 4.33750e-04 & 1.57121e-12 & 8.69675e-13 \\ \hline
+81 & 4.50469e-04 & 1.66451e-12 & 9.31137e-13 \\ \hline
+82 & 5.39757e-04 & 1.97529e-12 & 9.47249e-13 \\ \hline
+83 & 6.42306e-04 & 2.05867e-12 & 9.50470e-13 \\ \hline
+84 & 5.19491e-04 & 2.30233e-12 & 9.70425e-13 \\ \hline
+85 & 5.19662e-04 & 2.28787e-12 & 1.01391e-12 \\ \hline
+86 & 5.33383e-04 & 2.28022e-12 & 1.00284e-12 \\ \hline
+87 & 5.33268e-04 & 2.29377e-12 & 1.09560e-12 \\ \hline
+88 & 6.27341e-04 & 2.21554e-12 & 1.14357e-12 \\ \hline
+89 & 6.31623e-04 & 2.24017e-12 & 1.16569e-12 \\ \hline
+90 & 8.02125e-04 & 2.39984e-12 & 1.19415e-12 \\ \hline
+91 & 8.01543e-04 & 2.69002e-12 & 1.24766e-12 \\ \hline
+92 & 5.29111e-04 & 2.24959e-12 & 1.23540e-12 \\ \hline
+93 & 5.31673e-04 & 2.26938e-12 & 1.27993e-12 \\ \hline
+94 & 5.31890e-04 & 2.29189e-12 & 1.32937e-12 \\ \hline
+95 & 5.33179e-04 & 2.27211e-12 & 1.41987e-12 \\ \hline
+96 & 6.04331e-04 & 2.46800e-12 & 1.39482e-12 \\ \hline
+97 & 6.06074e-04 & 2.46843e-12 & 1.42324e-12 \\ \hline
+98 & 6.18409e-04 & 2.51404e-12 & 1.48752e-12 \\ \hline
+99 & 6.17428e-04 & 2.54730e-12 & 1.53327e-12 \\ \hline
+100 & 7.46775e-04 & 2.28769e-12 & 1.55604e-12 \\ \hline
+\end{tabular}
+\hspace*{-2.5cm}
+}
+\caption{Błędy}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & float32 & float64 & float128 \\ \hline
+110 & 1.05483e-03 & 3.35565e-12 & 1.81194e-12 \\ \hline
+120 & 1.34717e-03 & 5.85417e-12 & 1.91550e-12 \\ \hline
+130 & 1.56474e-03 & 6.85368e-12 & 2.42774e-12 \\ \hline
+140 & 2.46872e-03 & 8.79208e-12 & 2.84132e-12 \\ \hline
+150 & 2.94135e-03 & 9.78423e-12 & 3.33448e-12 \\ \hline
+160 & 3.29095e-03 & 1.36512e-11 & 3.74248e-12 \\ \hline
+170 & 4.28130e-03 & 1.52197e-11 & 4.43947e-12 \\ \hline
+180 & 4.03851e-03 & 1.89855e-11 & 5.59321e-12 \\ \hline
+190 & 5.38668e-03 & 2.75550e-11 & 6.11601e-12 \\ \hline
+200 & 5.97172e-03 & 3.11838e-11 & 6.72572e-12 \\ \hline
+210 & 5.41167e-03 & 2.97532e-11 & 8.14045e-12 \\ \hline
+220 & 9.18188e-03 & 3.63525e-11 & 8.36871e-12 \\ \hline
+230 & 7.86359e-03 & 4.17772e-11 & 9.32787e-12 \\ \hline
+240 & 1.11495e-02 & 4.53905e-11 & 1.07043e-11 \\ \hline
+250 & 1.42714e-02 & 5.11713e-11 & 1.18193e-11 \\ \hline
+260 & 1.34512e-02 & 5.59199e-11 & 1.35917e-11 \\ \hline
+270 & 1.55514e-02 & 6.88083e-11 & 1.67215e-11 \\ \hline
+280 & 1.85879e-02 & 7.78363e-11 & 1.87595e-11 \\ \hline
+290 & 1.97006e-02 & 7.92819e-11 & 2.00183e-11 \\ \hline
+300 & 1.90778e-02 & 8.96165e-11 & 2.14411e-11 \\ \hline
+\end{tabular}
+\caption{Błędy dla większych $n$}
+\end{table}
+
+Nawet dla największej badanej wartości $n$, niezależnie od precyzji użytego typu, pojawiający się błąd jest
+rzędu $10^{-12}$. Precyzja uzyskanych wyników w problemie 2 w takich samych warunkach jest znacznie lepsza niż w 
+problemie 1.
+
+Tutaj należałoby się zastanowić nad powodem powyższej różnicy wyników pomiędzy macierzami w problemie pierwszym i drugim.
+Poniżej części macierzy \textbf{A} dla $n=100$ dla obu problemów:
+
+$$
+A_1 = 
+\begin{bmatrix}
+1 & 1 & 1  &  \hdots & 1 & 1 & 1\\
+0.5   &     0.33333333 & 0.25   &  \hdots & 0.01010101 & .01 & 0.00990099\\
+0.33333333 & 0.25    &   0.2     &   \hdots & 0.01   &    0.00990099& 0.00980392\\
+\vdots & & & \ddots & & & \vdots\\
+0.01020408 & 0.01010101 & 0.01  &     \hdots & 0.00512821 & 0.00510204  & 0.00507614\\
+0.01010101 & 0.01  &     0.00990099 & \hdots & 0.00510204 & 0.00507614 & 0.00505051\\
+0.01   &    0.00990099 & 0.00980392 & \hdots & 0.00507614 & 0.00505051 & 0.00502513\\
+\end{bmatrix}
+$$
+
+$$
+A_2 = 
+\begin{bmatrix}
+2  &       1.    &     0.66666667 & \hdots & 0.02040816 & 0.02020202 & 0.02\\ 
+1.    &     2.     &    1.33333333 & \hdots & 0.04081633 & 0.04040404 & 0.04\\
+0.66666667 & 1.33333333 & 2.    &     \hdots 0.06122449 & 0.06060606 & 0.06\\
+\vdots & & & \ddots & & & \vdots\\
+0.02040816 & 0.04081633 & 0.06122449 & \hdots & 2.     &    1.97979798 & 1.96\\
+0.02020202 & 0.04040404 & 0.06060606 & \hdots & 1.97979798 & 2.         & 1.98\\
+0.02     &  0.04    &   0.06    &  \hdots & 1.96    &   1.98   &    2.\\
+\end{bmatrix}
+$$
+
+Jedną z przyczyn, dla których układ równań z problemu pierwszego daje tak złe wyniki jest metoda wybierania elementu wiodącego
+(pivotu). W tej implementacji algorytmu eliminacja Gaussa jako pivot wybierane są zawsze kolejne elementy na przekątnej 
+macierzy. W przypadku macierzy z problemu drugiego jest to zawsze 2 (po kolejnych redukcjach pivot osiąga wartości rzędu $10^{-2}$), 
+w przypadku macierzy z problemu pierwszego elementy na przekątnej redukują się na tyle mocno, że osiągają wartości rządu nawet $10^{-18}$. 
+Stanowi to problem, ponieważ poszczególne wiersze
+w metodzie eliminacji Gaussa są dzielone przez pivot, to znaczy mnożone przez jego odwrotność. Jeżeli pivot jest mały ($<1$), wówczas
+wiersze mnożone są przez dużą wartość, więc błędy zaokrągleń stają się duże w stosunku do współczynników oryginalnej macierzy.
+
+Oprócz tego można również obliczyć wskaźnik uwarunkowania macierzy $\kappa$. Wartość ta jest miarą tego, jak bardzo zmieni się rozwiązanie
+\textbf{x} układu równań w stosunku do zmiany \textbf{b}. Jeżeli wskaźnik uwarunkowania macierzy jest duży, nawet mały błąd w 
+\textbf{b} może powodować duże błędy w \textbf{x}.
+
+$$\kappa=\|A^{-1}\|\|A\|$$
+
+Można zastosować dowolną normę zwartą, tutaj zostanie użyta norma ``nieskończoność'', tj. $\displaystyle\|A\|_{\infty}=\max_{i}\sum_{j}|a_{ij}|$.
+
+Poniżej tabela z wybranymi wskaźnikami uwarunkowania macierzy dla różnych $n$:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+$n$ & $\kappa_1$ (problem 1) & $\kappa_2$ (problem 2)\\ \hline
+3 & 8.64000e+02 & 8.66667e+00 \\ \hline
+6 & 5.63447e+07 & 3.96667e+01 \\ \hline
+9 & 2.84317e+12 & 9.23810e+01 \\ \hline
+12 & 1.36454e+17 & 1.66822e+02 \\ \hline
+15 & 1.04335e+19 & 2.63294e+02 \\ \hline
+18 & 2.21394e+21 & 3.81736e+02 \\ \hline
+21 & 1.89813e+19 & 5.21917e+02 \\ \hline
+24 & 1.51520e+19 & 6.83833e+02 \\ \hline
+27 & 2.25108e+20 & 8.67483e+02 \\ \hline
+30 & 5.08850e+19 & 1.07287e+03 \\ \hline
+33 & 6.34109e+19 & 1.30055e+03 \\ \hline
+36 & 3.60448e+20 & 1.54997e+03 \\ \hline
+39 & 2.50037e+20 & 1.82111e+03 \\ \hline
+42 & 6.68682e+19 & 2.11399e+03 \\ \hline
+45 & 3.72911e+21 & 2.42860e+03 \\ \hline
+48 & 3.75331e+20 & 2.76521e+03 \\ \hline
+51 & 1.67838e+21 & 3.12386e+03 \\ \hline
+54 & 4.26339e+20 & 3.50424e+03 \\ \hline
+57 & 6.19806e+20 & 3.90635e+03 \\ \hline
+60 & 9.06089e+20 & 4.33019e+03 \\ \hline
+63 & 2.47455e+20 & 4.77576e+03 \\ \hline
+66 & 2.37977e+20 & 5.24360e+03 \\ \hline
+69 & 1.79781e+21 & 5.73321e+03 \\ \hline
+72 & 7.20453e+20 & 6.24455e+03 \\ \hline
+75 & 5.53474e+21 & 6.77762e+03 \\ \hline
+78 & 1.18038e+21 & 7.33242e+03 \\ \hline
+81 & 8.58646e+21 & 7.90918e+03 \\ \hline
+84 & 4.81463e+20 & 8.50802e+03 \\ \hline
+87 & 1.01666e+21 & 9.12860e+03 \\ \hline
+90 & 9.19833e+20 & 9.77090e+03 \\ \hline
+93 & 5.60807e+20 & 1.04349e+04 \\ \hline
+96 & 1.08158e+21 & 1.11207e+04 \\ \hline
+99 & 2.33922e+21 & 1.18287e+04 \\ \hline
+\end{tabular}
+\caption{Wskaźniki uwarunkowania macierzy}
+\end{table}
+
+Wskaźniki uwarunkowania dla macierzy z problemu 1 są znacznie więsze niż dla problemu 2.
+Oznacza to, że niewielki błąd (wynikający np. z przybliżeń) znacznie wpływa na wynik.
+
+\section{Problem 3}
+Ekspetyment z dwóch poprzednich problemów zostanie powtórzony dla macierzy zadanej wzorem:
+$$
+\begin{cases}
+    a_{ii}=k\\
+    a_{i,i+1}=\frac{1}{i+m}\\
+    a_{i,i-1}=\frac{k}{i+m+1} \ dla \ i > j\\
+    a_{i,j}=0 \ dla \ j<i-1 \ oraz \ j>i+1
+\end{cases}i,j=1,...,n
+$$
+Gdzie $k=6$ oraz $m=5$.
+
+Następnie układ rozwiązany zostanie metodą przeznaczoną do rozwiązywania układów z macierzą trójdiagonalną. Te dwie metody
+zostaną porównane (czas, dokładność obliczeń i zajętość pamięci) dla różnych rozmiarów układu (z pominięciem czasu tworzenia
+układu). Opisane zostanie to, jak w metodzie dla ukłądów z macierzą trójdiagonalną przechowywano i wykorzystano macierz \textbf{A}.
+
+\subsection{Opracowanie problemu}
+Zastosowane parametry są takie same jak w poprzednich problemach, $n\in\{3,...,100\}$, 3 rodzaje precyzji floata oraz 
+\textbf{x}\,$=[1,-1,1,-1,...]$. Zastosowaną rutyną do rozwiązywania układów z macierzą trójdiagonalną będzie algorytm 
+Thomasa. Algorytm ten działa analogicznie do eliminacji Gaussa, jednak wykorzystuje fakt, że poza trzema środkowymi
+przekątnymi macierzy są w niej same zera, tak więc tam, gdzie metoda Gaussa itarowałaby przez wszystkie wiersze, odejmując
+wiersz z obecnym pivotem, algorytm Thomasa działa tylko na wierszu z pivotem oraz kolejnym (bo wszystkie inne zawierają same
+zera). Algorytm ten przeważa nad eliminacją Gaussa w kilku aspektach: jego złożoność obliczeniowa to $O(n)$ (eliminacja
+Gaussa - $O(n^3)$), złożoność pamięciowa (jeżeli założyć, że macierze wejściowe muszą pozostać niemodyfikowane) to 
+$O(n)$ (eliminacja Gaussa - $O(n^2)$, trzeba skopiować całą macierz).
+
+Poniżej kilka wyników dla początkowych $n$:
+
+\begin{table}[H]
+\hspace*{-1.2cm}
+\centering
+\begin{tabular}{|l|p{5cm}|p{8cm}|}
+\hline
+$n$ & Wynik (Gaussian elimination) & Wynik (Thomas) \\ \hline
+3 & [ 1. -1.  1.] & [ 1. -1.  1.] \\ \hline
+4 & [ 1. -1.  1. -1.] & [ 1. -1.  1. -1.] \\ \hline
+5 & [ 1. -1.  1. -1.  1.] & [ 1. -1.  1. -1.  1.] \\ \hline
+6 & [ 1. -1.  1. -1.  1. -1.] & [ 1. -1.  1. -1.  1. -1.] \\ \hline
+7 & [ 1. -1.  1. -1.  1. -1.  1.] & [ 1. -1.  1. -1.  1. -1.  1.] \\ \hline
+8 & [ 1. -1.  1. -1.  1. -1.  1. -1.] & [ 1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+9 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1.] & [ 1. -1.  1. -1.  1. -1.  1. -1.  1.] \\ \hline
+10 & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.] & [ 1. -1.  1. -1.  1. -1.  1. -1.  1. -1.] \\ \hline
+\end{tabular}
+\caption{Wyniki (float64)}
+\hspace*{-1.2cm}
+\end{table}
+
+Dla pierwszych $n$ wyniki algorytmu Thomasa tak samo dokładne, co jest zgodne z intuicją, bo algorytm Thomasa to uproszczona
+wersja eliminacji Gaussa. Poniżej prównanie dokładności dla wszystkich badanych $n$ (tylko z wykorzystaniem float64, wpływ
+precyzji typu został zbadany już wcześniej).
+
+\newpage
+\thispagestyle{empty}
+
+\begin{table}[H]
+\parbox{.45\linewidth}{
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & Gauss & Thomas \\ \hline
+3 & 1.11022e-16 & 1.11022e-16 \\ \hline
+4 & 3.14018e-16 & 3.14018e-16 \\ \hline
+5 & 3.14018e-16 & 3.14018e-16 \\ \hline
+6 & 3.14018e-16 & 3.14018e-16 \\ \hline
+7 & 3.14018e-16 & 3.14018e-16 \\ \hline
+8 & 2.93737e-16 & 2.93737e-16 \\ \hline
+9 & 2.93737e-16 & 2.93737e-16 \\ \hline
+10 & 2.93737e-16 & 2.93737e-16 \\ \hline
+11 & 2.93737e-16 & 2.93737e-16 \\ \hline
+12 & 3.68219e-16 & 3.68219e-16 \\ \hline
+13 & 3.68219e-16 & 3.68219e-16 \\ \hline
+14 & 3.68219e-16 & 3.68219e-16 \\ \hline
+15 & 3.68219e-16 & 3.68219e-16 \\ \hline
+16 & 3.84593e-16 & 3.84593e-16 \\ \hline
+17 & 4.00297e-16 & 4.00297e-16 \\ \hline
+18 & 4.00297e-16 & 4.00297e-16 \\ \hline
+19 & 4.00297e-16 & 4.00297e-16 \\ \hline
+20 & 4.57757e-16 & 4.57757e-16 \\ \hline
+21 & 4.57757e-16 & 4.57757e-16 \\ \hline
+22 & 4.71028e-16 & 4.71028e-16 \\ \hline
+23 & 4.71028e-16 & 4.71028e-16 \\ \hline
+24 & 4.71028e-16 & 4.71028e-16 \\ \hline
+25 & 4.71028e-16 & 4.71028e-16 \\ \hline
+26 & 4.71028e-16 & 4.71028e-16 \\ \hline
+27 & 4.71028e-16 & 4.71028e-16 \\ \hline
+28 & 4.71028e-16 & 4.71028e-16 \\ \hline
+29 & 4.83935e-16 & 4.83935e-16 \\ \hline
+30 & 4.83935e-16 & 4.83935e-16 \\ \hline
+31 & 4.83935e-16 & 4.83935e-16 \\ \hline
+32 & 4.83935e-16 & 4.83935e-16 \\ \hline
+33 & 4.96507e-16 & 4.96507e-16 \\ \hline
+34 & 4.96507e-16 & 4.96507e-16 \\ \hline
+35 & 4.96507e-16 & 4.96507e-16 \\ \hline
+36 & 5.43896e-16 & 5.43896e-16 \\ \hline
+37 & 5.43896e-16 & 5.43896e-16 \\ \hline
+38 & 5.43896e-16 & 5.43896e-16 \\ \hline
+39 & 5.43896e-16 & 5.43896e-16 \\ \hline
+40 & 5.43896e-16 & 5.43896e-16 \\ \hline
+41 & 5.43896e-16 & 5.43896e-16 \\ \hline
+42 & 5.43896e-16 & 5.43896e-16 \\ \hline
+43 & 5.87475e-16 & 5.87475e-16 \\ \hline
+44 & 5.55112e-16 & 5.55112e-16 \\ \hline
+45 & 5.97873e-16 & 5.97873e-16 \\ \hline
+46 & 6.37775e-16 & 6.37775e-16 \\ \hline
+47 & 6.37775e-16 & 6.37775e-16 \\ \hline
+48 & 5.97873e-16 & 5.97873e-16 \\ \hline
+49 & 5.97873e-16 & 5.97873e-16 \\ \hline
+50 & 5.97873e-16 & 5.97873e-16 \\ \hline
+51 & 5.97873e-16 & 5.97873e-16 \\ \hline
+\end{tabular}
+}
+\parbox{.45\linewidth}{
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & Gauss & Thomas \\ \hline
+52 & 6.37775e-16 & 6.37775e-16 \\ \hline
+53 & 6.37775e-16 & 6.37775e-16 \\ \hline
+54 & 6.75322e-16 & 6.75322e-16 \\ \hline
+55 & 7.10890e-16 & 7.10890e-16 \\ \hline
+56 & 7.10890e-16 & 7.10890e-16 \\ \hline
+57 & 7.10890e-16 & 7.10890e-16 \\ \hline
+58 & 7.10890e-16 & 7.10890e-16 \\ \hline
+59 & 7.10890e-16 & 7.10890e-16 \\ \hline
+60 & 7.10890e-16 & 7.10890e-16 \\ \hline
+61 & 7.10890e-16 & 7.10890e-16 \\ \hline
+62 & 7.44760e-16 & 7.44760e-16 \\ \hline
+63 & 7.52990e-16 & 7.52990e-16 \\ \hline
+64 & 7.52990e-16 & 7.52990e-16 \\ \hline
+65 & 7.52990e-16 & 7.52990e-16 \\ \hline
+66 & 7.52990e-16 & 7.52990e-16 \\ \hline
+67 & 7.52990e-16 & 7.52990e-16 \\ \hline
+68 & 8.15844e-16 & 8.15844e-16 \\ \hline
+69 & 8.15844e-16 & 8.15844e-16 \\ \hline
+70 & 8.45521e-16 & 8.45521e-16 \\ \hline
+71 & 8.45521e-16 & 8.45521e-16 \\ \hline
+72 & 8.45521e-16 & 8.45521e-16 \\ \hline
+73 & 8.45521e-16 & 8.45521e-16 \\ \hline
+74 & 8.45521e-16 & 8.45521e-16 \\ \hline
+75 & 8.45521e-16 & 8.45521e-16 \\ \hline
+76 & 8.74190e-16 & 8.74190e-16 \\ \hline
+77 & 8.74190e-16 & 8.74190e-16 \\ \hline
+78 & 8.74190e-16 & 8.74190e-16 \\ \hline
+79 & 8.74190e-16 & 8.74190e-16 \\ \hline
+80 & 8.74190e-16 & 8.74190e-16 \\ \hline
+81 & 9.01949e-16 & 9.01949e-16 \\ \hline
+82 & 9.01949e-16 & 9.01949e-16 \\ \hline
+83 & 9.01949e-16 & 9.01949e-16 \\ \hline
+84 & 9.01949e-16 & 9.01949e-16 \\ \hline
+85 & 9.01949e-16 & 9.01949e-16 \\ \hline
+86 & 9.01949e-16 & 9.01949e-16 \\ \hline
+87 & 9.01949e-16 & 9.01949e-16 \\ \hline
+88 & 9.01949e-16 & 9.01949e-16 \\ \hline
+89 & 9.08757e-16 & 9.08757e-16 \\ \hline
+90 & 9.08757e-16 & 9.08757e-16 \\ \hline
+91 & 9.08757e-16 & 9.08757e-16 \\ \hline
+92 & 9.08757e-16 & 9.08757e-16 \\ \hline
+93 & 9.08757e-16 & 9.08757e-16 \\ \hline
+94 & 9.35491e-16 & 9.35491e-16 \\ \hline
+95 & 9.35491e-16 & 9.35491e-16 \\ \hline
+96 & 9.35491e-16 & 9.35491e-16 \\ \hline
+97 & 9.35491e-16 & 9.35491e-16 \\ \hline
+98 & 9.35491e-16 & 9.35491e-16 \\ \hline
+99 & 9.35491e-16 & 9.35491e-16 \\ \hline
+100 & 9.35491e-16 & 9.35491e-16 \\ \hline
+\end{tabular}
+}
+\caption{Błędy dla metod Gaussa i Thomasa}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+$n$ & Gauss & Thomas \\ \hline
+120 & 1.08779e-15 & 1.08779e-15 \\ \hline
+140 & 1.15911e-15 & 1.15911e-15 \\ \hline
+160 & 1.23130e-15 & 1.23130e-15 \\ \hline
+180 & 1.28037e-15 & 1.28037e-15 \\ \hline
+200 & 1.34149e-15 & 1.34149e-15 \\ \hline
+220 & 1.40872e-15 & 1.40872e-15 \\ \hline
+240 & 1.44329e-15 & 1.44329e-15 \\ \hline
+260 & 1.49777e-15 & 1.49777e-15 \\ \hline
+280 & 1.52630e-15 & 1.52630e-15 \\ \hline
+300 & 1.53837e-15 & 1.53837e-15 \\ \hline
+320 & 1.59733e-15 & 1.59733e-15 \\ \hline
+340 & 1.65047e-15 & 1.65047e-15 \\ \hline
+360 & 1.68007e-15 & 1.68007e-15 \\ \hline
+380 & 1.74838e-15 & 1.74838e-15 \\ \hline
+400 & 1.78328e-15 & 1.78328e-15 \\ \hline
+420 & 1.82766e-15 & 1.82766e-15 \\ \hline
+440 & 1.86107e-15 & 1.86107e-15 \\ \hline
+460 & 1.91332e-15 & 1.91332e-15 \\ \hline
+480 & 1.96104e-15 & 1.96104e-15 \\ \hline
+500 & 2.06812e-15 & 2.06812e-15 \\ \hline
+\end{tabular}
+\caption{Błędy dla większych wartości $n$}
+\end{table}
+
+Błędy są dokładnie takie same niezależnie od metody, jak zostało wspomniane wcześniej, jest przewidywalyn wynikiem, bo metody Gaussa
+i Thomasa są u podstaw takie same, tylko metoda Thomasa ogranicza się do działania na elementach trójdiagonali.
+
+Poniżej porwónanie czasów działania (w sekundach):
+
+\newpage
+\thispagestyle{empty}
+
+\begin{table}[H]
+\parbox{.45\linewidth}{
+\hspace*{-1cm}
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & Gauss & Thomas \\ \hline
+3 & 0.0000619888 & 0.0000097752 \\ \hline
+4 & 0.0000605583 & 0.0000104904 \\ \hline
+5 & 0.0000586510 & 0.0000112057 \\ \hline
+6 & 0.0001332760 & 0.0000202656 \\ \hline
+7 & 0.0001723766 & 0.0000269413 \\ \hline
+8 & 0.0001933575 & 0.0000269413 \\ \hline
+9 & 0.0001623631 & 0.0000243187 \\ \hline
+10 & 0.0002050400 & 0.0000312328 \\ \hline
+11 & 0.0002467632 & 0.0000228882 \\ \hline
+12 & 0.0002651215 & 0.0000255108 \\ \hline
+13 & 0.0002963543 & 0.0000422001 \\ \hline
+14 & 0.0003426075 & 0.0000267029 \\ \hline
+15 & 0.0005545616 & 0.0000529289 \\ \hline
+16 & 0.0005488396 & 0.0000472069 \\ \hline
+17 & 0.0006279945 & 0.0000414848 \\ \hline
+18 & 0.0007517338 & 0.0000555515 \\ \hline
+19 & 0.0008482933 & 0.0000672340 \\ \hline
+20 & 0.0009593964 & 0.0000400543 \\ \hline
+21 & 0.0007262230 & 0.0000364780 \\ \hline
+22 & 0.0006790161 & 0.0000369549 \\ \hline
+23 & 0.0007746220 & 0.0000381470 \\ \hline
+24 & 0.0010666847 & 0.0000436306 \\ \hline
+25 & 0.0009360313 & 0.0000662804 \\ \hline
+26 & 0.0011546612 & 0.0000457764 \\ \hline
+27 & 0.0009803772 & 0.0000619888 \\ \hline
+28 & 0.0010209084 & 0.0000708103 \\ \hline
+29 & 0.0010361671 & 0.0000452995 \\ \hline
+30 & 0.0010993481 & 0.0000452995 \\ \hline
+31 & 0.0012125969 & 0.0000746250 \\ \hline
+32 & 0.0022766590 & 0.0000927448 \\ \hline
+33 & 0.0023801327 & 0.0000879765 \\ \hline
+34 & 0.0023727417 & 0.0000596046 \\ \hline
+35 & 0.0015447140 & 0.0000562668 \\ \hline
+36 & 0.0016992092 & 0.0000882149 \\ \hline
+37 & 0.0015561581 & 0.0000529289 \\ \hline
+38 & 0.0019032955 & 0.0000991821 \\ \hline
+39 & 0.0028629303 & 0.0000839233 \\ \hline
+40 & 0.0019550323 & 0.0000615120 \\ \hline
+41 & 0.0019819736 & 0.0000629425 \\ \hline
+42 & 0.0020363331 & 0.0000622272 \\ \hline
+43 & 0.0040171146 & 0.0001215935 \\ \hline
+44 & 0.0043051243 & 0.0000996590 \\ \hline
+45 & 0.0022635460 & 0.0000650883 \\ \hline
+46 & 0.0023288727 & 0.0000636578 \\ \hline
+47 & 0.0029795170 & 0.0000715256 \\ \hline
+48 & 0.0026295185 & 0.0000736713 \\ \hline
+49 & 0.0038347244 & 0.0001218319 \\ \hline
+50 & 0.0029559135 & 0.0000746250 \\ \hline
+51 & 0.0035314560 & 0.0000882149 \\ \hline
+\end{tabular}
+}
+\parbox{.45\linewidth}{
+\begin{tabular}{|l|l|l|l|}
+\hline
+$n$ & Gauss & Thomas \\ \hline
+52 & 0.0032415390 & 0.0000820160 \\ \hline
+53 & 0.0053093433 & 0.0000941753 \\ \hline
+54 & 0.0035138130 & 0.0000839233 \\ \hline
+55 & 0.0038602352 & 0.0000853539 \\ \hline
+56 & 0.0055491924 & 0.0001106262 \\ \hline
+57 & 0.0039956570 & 0.0000896454 \\ \hline
+58 & 0.0039348602 & 0.0000896454 \\ \hline
+59 & 0.0063655376 & 0.0001385212 \\ \hline
+60 & 0.0067534447 & 0.0001616478 \\ \hline
+61 & 0.0047607422 & 0.0000948906 \\ \hline
+62 & 0.0045101643 & 0.0000922680 \\ \hline
+63 & 0.0043694973 & 0.0001051426 \\ \hline
+64 & 0.0059125423 & 0.0001597404 \\ \hline
+65 & 0.0049693584 & 0.0000951290 \\ \hline
+66 & 0.0047736168 & 0.0000939369 \\ \hline
+67 & 0.0064024925 & 0.0000991821 \\ \hline
+68 & 0.0050079823 & 0.0000927448 \\ \hline
+69 & 0.0053901672 & 0.0001285076 \\ \hline
+70 & 0.0065517426 & 0.0001037121 \\ \hline
+71 & 0.0056121349 & 0.0001022816 \\ \hline
+72 & 0.0068676472 & 0.0001111031 \\ \hline
+73 & 0.0059673786 & 0.0001046658 \\ \hline
+74 & 0.0073094368 & 0.0001091957 \\ \hline
+75 & 0.0062007904 & 0.0001070499 \\ \hline
+76 & 0.0088074207 & 0.0001599789 \\ \hline
+77 & 0.0066230297 & 0.0001106262 \\ \hline
+78 & 0.0078511238 & 0.0001115799 \\ \hline
+79 & 0.0068879128 & 0.0001113415 \\ \hline
+80 & 0.0087833405 & 0.0001146793 \\ \hline
+81 & 0.0073301792 & 0.0001149178 \\ \hline
+82 & 0.0085895061 & 0.0001168251 \\ \hline
+83 & 0.0080413818 & 0.0001251698 \\ \hline
+84 & 0.0079605579 & 0.0001177788 \\ \hline
+85 & 0.0092260838 & 0.0001583099 \\ \hline
+86 & 0.0082290173 & 0.0001211166 \\ \hline
+87 & 0.0094833374 & 0.0001237392 \\ \hline
+88 & 0.0088658333 & 0.0001304150 \\ \hline
+89 & 0.0087473392 & 0.0001268387 \\ \hline
+90 & 0.0106673241 & 0.0001313686 \\ \hline
+91 & 0.0092604160 & 0.0001437664 \\ \hline
+92 & 0.0093936920 & 0.0001323223 \\ \hline
+93 & 0.0108370781 & 0.0001347065 \\ \hline
+94 & 0.0098938942 & 0.0001597404 \\ \hline
+95 & 0.0105099678 & 0.0001373291 \\ \hline
+96 & 0.0181446075 & 0.0002424717 \\ \hline
+97 & 0.0181982517 & 0.0002415180 \\ \hline
+98 & 0.0185339451 & 0.0002431870 \\ \hline
+99 & 0.0193188190 & 0.0002481937 \\ \hline
+100 & 0.0204241276 & 0.0002508163 \\ \hline
+\end{tabular}
+}
+\caption{Czas działania metod Gaussa i Thomasa}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+$n$ & Gauss & Thomas \\ \hline
+120 & 0.0286643505 & 0.0002901554 \\ \hline
+140 & 0.0480132103 & 0.0003533363 \\ \hline
+160 & 0.0635702610 & 0.0003936291 \\ \hline
+180 & 0.0751059055 & 0.0002388954 \\ \hline
+200 & 0.0806608200 & 0.0002636909 \\ \hline
+220 & 0.0900340080 & 0.0002911091 \\ \hline
+240 & 0.1021373272 & 0.0003302097 \\ \hline
+260 & 0.1145665646 & 0.0003395081 \\ \hline
+280 & 0.1272068024 & 0.0003728867 \\ \hline
+300 & 0.1455094814 & 0.0003950596 \\ \hline
+320 & 0.1545541286 & 0.0004363060 \\ \hline
+340 & 0.1762731075 & 0.0004467964 \\ \hline
+360 & 0.1975157261 & 0.0004746914 \\ \hline
+380 & 0.2114603519 & 0.0005013943 \\ \hline
+400 & 0.2331740856 & 0.0005328655 \\ \hline
+420 & 0.2571897507 & 0.0005550385 \\ \hline
+440 & 0.2799589634 & 0.0005803108 \\ \hline
+460 & 0.3035759926 & 0.0006234646 \\ \hline
+480 & 0.3311092854 & 0.0006418228 \\ \hline
+500 & 0.3766815662 & 0.0006608963 \\ \hline
+\end{tabular}
+\caption{Czasy działania dla większych wartości $n$}
+\end{table}
+
+W metodzie Thomasa czasy działania są znacznie krótsze, co również nie zaskakuje, wykonuje ona bowiem znacznie mniej operacji, ograniczając
+się tylko do trójdiagonali macierzy.
+
+Algortytm Thomasa wygrywa również w kwestii zajętości pamięci, ponieważ, przy założeniu, że oryginalne macierze nie mogą być
+modyfikowane, wykorzystana tu implementacja używa dwóch dodatkowych tablic o długości $n$, natomiast eliminacja Gaussa potrzebuje
+dodatkowej macierzy o rozmiarze $n$\,x\,$(n+1)$.
+
+\subsection{Wnioski}
+Metoda Gaussa jest skutecznym i prostym sposobem na rozwiązywanie układu równań liniowych, jednak czasami cierpi z powodu 
+błędów w dokładności spowodowanych słabym uwarunkowaniem układów wejściowych lub sposobu wybierania elementu wiodącego (czemu 
+można zapobiec stosując inne elementy wiodące). Jeżeli macierz jest trójdiagonalna, warto zamiast 
+eliminacji Gaussa wykorzystać algorytm Thomasa, który jest uproszczoną wersją eliminacji, daje wyniki o takiej samej dokłądności,
+ale działa znacznie szybciej.
+
+\end{document}
