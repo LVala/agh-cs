@@ -1,0 +1,17 @@
+1) pedestrians don't wait for the field with the smallest static field value to empty if it's taken,
+but go to the smallest (or equal because this gives chance to find a smaller one) field instead 
+(if it's smaller or equals than the current field). In general, thay try to move all the time except when they would
+get further away from exit, which sounds like a real crowd behaviour.
+
+2) implement walls (wasn't specified in lab_5 instruction and it seems that it should have been)
+
+3) add new neighbour type which distinguishes diagonal neighbours from straight ones (as distance to diagonal neighbouring field would be 
+greater than to the one that shares the side of the current field) and create static field accordingly
+
+4) element of randomness: for every iteration a person on a field gets theirs "annoyance" counter incremented, and the greater the annoyance,
+the more there is a chance that person will move, iven if destination field value is greater than current one
+
+5) walls repulsion: static field value slighly rised close to the walls (the implemementation is very naive and prone to people getting stuck,
+so it's turned off by default, can be changed in Board.java, look for // WALL REPULSION)
+
+POSSIBLE IMPROVEMENT: make pedestrians take longer route, when it is clear that taking shorter route will take more iterations because of high density of crowd
