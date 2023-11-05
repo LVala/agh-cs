@@ -1,0 +1,1 @@
+#to coś za łatwe jest nie robie
