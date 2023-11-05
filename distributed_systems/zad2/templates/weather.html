@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather</title>
+</head>
+<body>
+  <h1>Weather in the cities</h1>
+
+  <h2>Cities</h2>
+  <p>Current weather and forecast for {{ days }} days.</p>
+  <p>Values agregated from these cities:</p>
+  <p>{% for city in cities %} {{ city }}, {% endfor %}</p>
+
+  <h2>Current</h2>
+  <p>Average temperature: {{ "%.1f°C"|format(avg_temp_now) }}</p>
+  <p>Sensed average temperature: {{ "%.1f°C"|format(avg_feelslike_now) }}</p>
+
+  <h2>Forecast</h2>
+  {% for day in forecast %}
+    <h3>{{ day["date"] }}</h3>
+    <p>Minimum temperature: {{ "%.1f°C"|format(day["min"]) }}</p>
+    <p>Maximum temperature: {{ "%.1f°C"|format(day["max"]) }}</p>
+    <p>Average temperature: {{ "%.1f°C"|format(day["avg"]) }}</p>
+  {% endfor %}
+</body>
+</html>

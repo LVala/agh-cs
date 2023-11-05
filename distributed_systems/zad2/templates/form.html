@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form</title>
+</head>
+<body>
+    <form action="/weather" method="get">
+      <label for="city">City:</label>
+      <input type="text" name="city" id="city">
+      <br>
+      <label for="radius">Radius (in km):</label>
+      <input type="text" name="radius" id="radius">
+      <br>
+      <label for="days">Days: </label>
+      <input type="text" name="days" id="days">
+      <br>
+      <label for="key">Auth key: </label>
+      <input type="text" name="key" id="key">
+      <br>
+      <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

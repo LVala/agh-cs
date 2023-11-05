@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package weather_notifier;
+
+service WeatherNotifier {
+  // receive notifications periodically
+  rpc SubscribePeriodic(PeriodicSubscription) returns (stream Weather);
+
+  // receive notification when condition is met
+  rpc SubscribeOnCondition(OnConditionSubscription) returns (stream Weather);
+}
+
+message PeriodicSubscription {
+  repeated string cities = 1;
+  uint32 interval = 2;  // in seconds
+}
+
+message OnConditionSubscription {
+  repeated string cities = 1;
+  oneof condition {
+    int32 temperature = 2;
+    bool is_night = 3;
+    Sky sky = 4;
+    Fall fall = 5;
+  }
+}
+
+message Weather {
+  string city = 1;
+  int32 temperature = 2;  // in Celsius
+  bool is_night = 3;
+  Sky sky = 4;
+  repeated Fall falls = 6;
+}
+
+enum Sky {
+  CLEAR = 0;
+  PASSING_CLOUDS = 1;
+  PARTLY_CLOUDY = 2;
+  CLOUDY = 3;
+  COMPLETELY_CLOUDED = 4;
+}
+
+message Fall {
+  FallType type = 1;
+  uint32 intensity = 2;  // scale 1-100 
+}
+
+enum FallType {
+  RAIN = 0;
+  SNOW = 1;
+  HAIL = 2;
+}
+
