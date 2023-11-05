@@ -1,0 +1,228 @@
+\documentclass{article}
+
+\usepackage{polski}
+\usepackage{amsmath, array}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{multirow}
+\usepackage[shortlabels]{enumitem}
+
+\title{Laboratorium Node.js}
+\author{\textbf{Łukasz Wala}\\
+    \textit{AGH, Wydział Informatyki, Elektroniki i Telekomunikacji} \\
+    \textit{Teoria Współbieżności 2022/23}}
+\date{Kraków, \today}
+
+\begin{document}
+\maketitle
+
+\section{Treść zadań}
+
+
+\begin{enumerate}
+    \item 
+    \begin{enumerate}[a)]
+        \item
+        Zaimplementuj funkcję loop, wg instrukcji z załączonego pliku.
+        \item 
+        wykorzystaj funkcję waterfall biblioteki \textit{async}.
+    \end{enumerate}
+    \item
+    Proszę napisać program obliczający liczbę linii we wszystkich plikach tekstowych z danego drzewa katalogów. 
+    Do testów proszę wykorzystać zbiór danych Traceroute Data. Program powinien wypisywać liczbę linii w każdym pliku, 
+    a na końcu ich globalną sumę. Proszę zmierzyć czas wykonania dwóch wersji programu: z synchronicznym i asynchronicznym
+    przetwarzaniem plików.
+\end{enumerate}
+
+\section{Implementacja zadania 1}
+
+Do zadania załączony został kod:
+
+\begin{verbatim}
+function printAsync(s, cb) {
+  var delay = Math.floor((Math.random() * 1000) + 500);
+  setTimeout(function () {
+    console.log(s);
+    if (cb) cb();
+  }, delay);
+}
+  
+function task(n) {
+  return new Promise((resolve, reject) => {
+    printAsync(n, function () {
+    resolve(n);
+    });
+  });
+}
+\end{verbatim}
+
+Polega ono na napisaniu funckji \textit{loop(m)}, która m razy wykona poniższy fragment kodu (nie jest to sprecyzowane w
+poleceniu, ale zakładam, że nie chodzi o zwykłą pętlę \textit{for} wywołującą fragment w każdej iteracji, ale o synchroniczne
+wykonanie kolejnych wywołań fragmentu).
+
+\begin{verbatim}
+task(1).then((n) => {
+  console.log('task', n, 'done');
+  return task(2);
+}).then((n) => {
+  console.log('task', n, 'done');
+  return task(3);
+}).then((n) => {
+  console.log('task', n, 'done');
+  console.log('done');
+});
+\end{verbatim}
+
+Poniżej implementacja funkcji \textit(loop):
+
+\begin{verbatim}
+function loop(m) {
+  if (m === 0) return;
+  console.log("RUN", m)
+  
+  task(1).then((n) => {
+    console.log('task', n, 'done');
+    return task(2);
+  }).then((n) => {
+    console.log('task', n, 'done');
+    return task(3);
+  }).then((n) => {
+    console.log('task', n, 'done');
+    console.log('done');
+  }).then(() => loop(m-1));
+}
+\end{verbatim}
+
+Funkcja jest wywoływana rekurencyjnie w ostatnim callbacku \textit{then}, dzięki czemu kolejne wywołania fragmentu są synchroniczne.
+
+Drugim podejściem będzie użycie funkcji \textit{waterfall} z modułu \textit{async}. Funkcja ta przyjmuje m. in. tablicę asynchronicznych
+funkcji, które wykonuje synchronicznie przekazując wartość zwracaną z funkcji $n-1$ do funkcji $n$:
+
+\begin{verbatim}
+function loop(m) {
+  const tasks = [];
+  for (let i=0; i<m; ++i) {
+    tasks.push((callback) => {
+    console.log("RUN", i)
+    task(1).then((n) => {
+      console.log('task', n, 'done');
+      return task(2);
+    }).then((n) => {
+      console.log('task', n, 'done');
+      return task(3);
+    }).then((n) => {
+      console.log('task', n, 'done');
+      console.log('done');
+    }).then(() => callback(null));;
+    })
+  }
+
+  async.waterfall(tasks, (err, res) => console.log(err));
+}
+\end{verbatim}
+
+Do funkcji przekazywana tablicę funkcji asynchronicznych (w tym przypadku są takie same). Wykonywane są one synchronicznie.
+
+\section{Implementacja zadania 2}
+
+Rozwiązanie z asynchronicznym przetwarzaniem zostało zaimplementowane następująco: 
+
+\begin{verbatim}
+function countLines(file, callback) {
+    let count = 0;
+    fs.createReadStream(file).on('data', function(chunk) {
+        count += chunk.toString('utf8')
+        .split(/\r\n|[\n\r\u0085\u2028\u2029]/g)
+        .length-1;
+    }).on('end', function() {
+        console.log(file, count)
+        callback(count);
+    }).on('error', function(err) {
+        callback(0);
+    });
+}
+
+function lc_async() {
+    console.time("walk");
+
+    files = walk.sync("PAM08/");
+    callbacks = files.map((filepath) => {
+        return new Promise((resolve, reject) => {
+            lines = countLines(filepath, (n) => resolve(n));
+        })
+    });
+
+    Promise.all(callbacks).then((result) => {
+        console.log("Lines total: ", result.reduce((acc, cur) => acc + cur, 0));
+        console.timeEnd("walk");
+    });
+}
+\end{verbatim}
+
+Przy użyciu funkcji \textit{walk.sync()} wyznaczane są wszystkie potencjalne pliki do przetworzenia.
+Następnie są one asynchronicznie przetwarzane (zostają opakowane w \textit{Promise}). Funkcja
+\textit{Promise.all()} pozwala na zebranie wyników od każdej z funkcji przetwarzających i ich wyświetlenie.
+
+Całkowity czas działania dla tego wariantu wyniósł 190.186 ms dla danych testowych.
+
+Poniżej implementacja z przetwarzaniem synchronicznym (z użyciem tej samej funkcji \textit{countLines}):
+
+\begin{verbatim}
+function countLines(files, index, totalCount) {
+    if (index >= files.length) {
+        console.log("Total count:", totalCount)
+        console.timeEnd("walk");
+        return;
+    };
+    let count = 0;
+    fs.createReadStream(files[index]).on('data', function(chunk) {
+        count += chunk.toString('utf8')
+        .split(/\r\n|[\n\r\u0085\u2028\u2029]/g)
+        .length-1;
+    }).on('end', function() {
+        console.log(files[index], count);
+        countLines(files, index+1, totalCount + count,);
+    }).on('error', function(err) {
+        countLines(files, index+1, totalCount);
+    });
+}
+
+function lc_sync() {
+    console.time("walk");
+
+    counter = 0;
+    files = walk.sync("PAM08/");
+
+    countLines(files, 0, 0);
+}
+\end{verbatim}
+
+Czas jej wykonania to 444.882 ms.
+
+Jak widać, istnieje różnica pomiędzy czasami wykonania programów, jednak nie taka, jakiej można by się
+spodziewać po programie działającym prawdziwie równolegle a kompletnie synchronicznie. Z racji architektury
+\textit{Node.js}, zadanie nie są wykonywanie równolegle, ale nadal na jednym wątku, jedynie asynchronicznie.
+Niewielki, uzyskany tutaj narzut może wynikać np. z szybszej implementacji przy użyciu \textit{Promises}, ale nie
+z prawdziwej wielowątkowości.
+
+\section{Wnioski}
+
+\textit{Node.js} udostępnia wiele mechanizmów asynchroniczności, jak np. \textit{Promises}, \textit{async/await} 
+czy moduł \textit{async}. Architektura \textit{Node.js} pozwala na tak wygodną asynchroniczność 
+ze względu na użycie pętli zdarzeń (\textit{Event Loop}), która synchronizuje wykonanie zadań. Taka 
+architektura, pomimo tego, że pętla zdarzeń działa na jedym wątku, pozwala na oszczędzeniu czasu np.
+na oczekiwanie na wydarzenia wejścia/wyjścia.
+
+\section{Bibliografia}
+
+\begin{enumerate}
+    \item 
+    Dokumentacja języka JavaScript - https://developer.mozilla.org
+    \item
+    Dokumentacja \textit{Node.js} - https://nodejs.org/api
+    \item
+    Dokumentacja modułu \textit{async} - https://caolan.github.io/async/v3
+\end{enumerate}
+
+\end{document}

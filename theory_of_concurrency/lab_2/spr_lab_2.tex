@@ -1,0 +1,230 @@
+\documentclass{article}
+
+\usepackage{polski}
+\usepackage{amsmath, array}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{multirow}
+
+\title{Laboratorium 2}
+\author{\textbf{Łukasz Wala}\\
+    \textit{AGH, Wydział Informatyki, Elektroniki i Telekomunikacji} \\
+    \textit{Teoria Współbieżności 2022/23}}
+\date{Kraków, \today}
+
+\begin{document}
+\maketitle
+
+\section{Treść zadania}
+\begin{enumerate}
+    \item
+    Zaimplementować semafor binarny za pomocą metod \textit{wait} i \textit{notify}, użyć go do synchronizacji programu \textit{Wyścig}.
+    \item
+    Pokazać, że do implementacji semafora za pomocą metod \textit{wait} i \textit{notify} nie wystarczy instrukcja \textit{if}, tylko potrzeba użyc \textit{while}. 
+    Wyjasnić teoretycznie dlaczego i potwierdzic eksperymentem w praktyce. (wskazówka: rozważyc dwie kolejki: 
+    czekajaca na wejście do monitora obiektu oraz kolejkę zwiazaną z instrukcją \textit{wait}, rozważyc kto i kiedy jest budzony i kiedy nastepuje wyścig).
+    \item
+    Zaimplementować semafor licznikowy (ogólny) za pomocą semaforów binarnych. Czy semafor binarny jest szczególnym przypadkiem semafora ogólnego?
+\end{enumerate}
+
+\section{Semafor binarny}
+
+Pierwszym krokiem rozwiązania jest zaimplementowanie semafora binarnego:
+
+\begin{verbatim}
+class BinarySemaphore {
+    private boolean state;
+
+    public BinarySemaphore() {
+        this.state = true;
+    }
+
+    public synchronized void P() {
+        while (!state) {
+            try {
+                wait();  
+            }
+            catch (InterruptedException e) {
+                System.exit(0);
+            }
+        }
+
+        state = false;
+    }
+    
+    public synchronized void V() {
+        state = true;
+        notifyAll();
+    }
+}                
+\end{verbatim}
+
+Stworzony semafor może zostać użyty do zsynchronizowania zadania z poprzedniego laboratorium:
+
+\begin{verbatim}
+class Counter {
+    private int _val;
+    public Counter(int n) {
+        _val = n;
+    }
+    public void inc() {
+        _val++;
+    }
+    public void dec() {
+        _val--;
+    }
+    public int value() {
+        return _val;
+    }
+}
+
+class IThread extends Thread {
+    private Counter counter;
+    private BinarySemaphore semaphore;
+
+    public IThread(Counter counter, BinarySemaphore semaphore) {
+        this.counter = counter;
+        this.semaphore = semaphore;
+    }
+
+    public void run() {
+        for (int i=0; i<10_000; ++i) {
+            semaphore.P();
+            counter.inc();
+            semaphore.V();
+        }
+    }
+}
+
+class DThread extends Thread {
+    private Counter counter;
+    private BinarySemaphore semaphore;
+
+    public DThread(Counter counter, BinarySemaphore semaphore) {
+        this.counter = counter;
+        this.semaphore = semaphore;
+    }
+
+    public void run() {
+        for (int i=0; i<10_000; ++i) {
+            semaphore.P();
+            counter.dec();
+            semaphore.V();
+        }
+    }
+}
+
+public class Race {
+    public static void main(String[] args) throws InterruptedException {
+
+        Counter cnt = new Counter(0);
+        BinarySemaphore semaphore = new BinarySemaphore();
+        DThread dthread = new DThread(cnt, semaphore);
+        IThread ithread = new IThread(cnt, semaphore);
+
+        dthread.start();
+        ithread.start();
+        dthread.join();
+        ithread.join();
+
+        System.out.println(cnt.value());
+    }
+}    
+\end{verbatim}
+
+Tym sposobem możemy skutecznie zaimplementować licznik.
+
+\section{Implementacja semafora - dlaczego \textit{while}?}
+
+Mogłoby się wydawać, że w powyższej implementacji semafora możnaby zastąpić pętlę \textit{while} 
+wyrażeniem \textit{if}. Niestety jednak w przypadku, gdy zostanie użyty \textit{if}, implementacja 
+nie będzie poprawnie działać z kilku powodów:
+
+\begin{enumerate}
+    \item
+    wątek może wybudzić się nie będąc wywołanym przez funkcję \textit{notify}, przerwanym itp. (ang. \textit{spurious wakeup}).
+    Co prawda jest to bardzo żadkie, jednek użycie pętli \textit{while} zapewnia, że jeżeli warunek
+    nie będzie spełniony, wątek nie zostanie wybudzony.
+    \item
+    jeżeli do wybudzenia wątków użyta jest funkcja \textit{notifyAll}, wówczas wszystkie wątki zablokowane
+    przez semafor zostaną odblokowane i zaczną konkurować o to, który wznowi wykonywanie jako pierwszy.
+    Dzięki użyciu pętli \textit{while} wszystkie wątki, oprócz pierwszego, który się wykona, wejdą w
+    stan oczekiwania, co jest pożądanym zachowaniem. Użycie wyrażenia \textit{if} poskutkowałoby odblokowaniem
+    wszystkich wątków.
+\end{enumerate}
+
+\begin{verbatim}
+...
+public synchronized void P() {
+    if (!state) {  // if instead of while
+        try {
+            wait();  
+        }
+        catch (InterruptedException e) {
+            System.exit(0);
+        }
+    }
+
+    state = false;
+}
+...
+\end{verbatim}
+
+Powyższ implementacja nie zapewnia poprawnej synchronizacji.
+
+\section{Semafor licznikowy}
+
+Za pomocą semafora binarnego można zaimplementować semafor licznikowy:
+
+\begin{verbatim}
+class CountingSemaphore {
+    private int count;
+    private BinarySemaphore binarySemaphore;
+
+    public CountingSemaphore() {
+        this.count = 1;
+        this.binarySemaphore = new BinarySemaphore();
+    }
+
+    public void P() {
+        binarySemaphore.P();
+        synchronized (this) {
+            --count;
+            if (count > 0) {
+                binarySemaphore.V();
+            }
+        }
+    }
+    
+    public synchronized void V() {
+        ++count;
+        if (count == 1) {
+            binarySemaphore.V();
+        }
+    }
+}        
+\end{verbatim}
+
+Semafor licznikowy jest typem semafora, który pozwala na jednoczesny dostęp $N$ wątków do
+współdzielonego stanu/sekcji krytycznej. 
+Jak można zauważyć, semafor binarmy jest semaforem licznikowym dla $N=1$.
+
+\section{Wnioski}
+
+Semafory są prostym, ale skutecznym sposobem na ograniczenie dostępu wielu równolegle działających
+wątków do współdzielonego stanu i uniknięcia problemów z dostępem do sektcji krytycznej/atomicznością operacji.
+Mogą zostać zaimplementowane za pomocą intrucji \textit{wait} oraz \textit{notify} w języku Java.
+Semafor licznikowy pozwala na dostęp $N$ wątków do współdzielonej sekcji, nastomiast semafor binarny pozwala
+na dostęp tylko jednemu wątkowi.
+
+\section{Bibliografia}
+
+\begin{enumerate}
+    \item 
+    Dokumentacja języka Java - docs.oracle.com
+
+\end{enumerate}
+
+
+\end{document}

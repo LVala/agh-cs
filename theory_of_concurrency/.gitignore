@@ -1,0 +1,15 @@
+# Java
+
+*.class
+
+# Latex
+
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+
+# lab-js
+node_modules
+PAM08/

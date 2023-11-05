@@ -1,0 +1,11 @@
+{
+    "name": "lab-js",
+    "description": "Concurrency in JS",
+    "author": "Łukasz Wala",
+    "dependencies": {
+        "async": "3.2.x",
+        "q": "1.5.x",
+        "walkdir": "^0.4.1"
+    },
+    "engine": "node >= 14.15.x"
+}
