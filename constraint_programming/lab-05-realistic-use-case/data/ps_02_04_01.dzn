@@ -1,0 +1,14 @@
+nr = 2;
+stageF=true;
+ns = 7;
+nsh = 4;
+size = [4,8,2,5,4,3,3];
+ship = [3,2,1,4,3,1,1];
+stack_time = 2;
+reclaim_time = 2;
+reclaim_speed = 1;
+maxtime = 60;
+arrival = [ 20, 0, 10, 0 ];
+len = 14;
+westend  = [10, 0, 8, 8, 6, 3, 0];
+which = [1, 2, 1, 1, 2, 2, 1];
