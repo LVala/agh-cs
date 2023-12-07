@@ -1,0 +1,6 @@
+.venv
+__pycache__
+pyfm.egg-info
+build
+
+.vscode

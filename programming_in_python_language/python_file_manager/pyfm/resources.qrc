@@ -1,0 +1,17 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file alias="add.svg">../res/plus.svg</file>
+    <file alias="delete.svg">../res/remove.svg</file>
+    <file alias="down.svg">../res/up_arrow.svg</file>
+    <file alias="edit.svg">../res/edit.svg</file>
+    <file alias="file.svg">../res/file.svg</file>
+    <file alias="folder.svg">../res/folder.svg</file>
+    <file alias="forward.svg">../res/next.svg</file>
+    <file alias="home.svg">../res/home.svg</file>
+    <file alias="left.svg">../res/left_arrow.svg</file>
+    <file alias="minus.svg">../res/minus.svg</file>
+    <file alias="refresh.svg">../res/refresh.svg</file>
+    <file alias="right.svg">../res/right_arrow.svg</file>
+    <file alias="scissors.svg">../res/scissors.svg</file>
+</qresource>
+</RCC>
