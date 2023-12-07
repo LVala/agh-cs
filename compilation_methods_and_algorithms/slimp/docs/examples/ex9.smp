@@ -1,0 +1,18 @@
+fun main() {
+    if (2+2) as bool {
+        vos: char = 'a';
+        print(vos, "first scope \n");
+        if 7 > 5 {
+            print(vos, "second scope \n");
+            vos: char = 'b';
+            print(vos, "second scope \n");
+        }
+        print(vos, "first scope \n");
+        a: bool = true;
+        c: int = a as int;
+        x: int = 8 + 5;
+    } else {
+        vos: char = 'b';
+        print(vos);
+    }
+}

@@ -1,0 +1,8 @@
+fun print_hello(): float {
+    b: bool = (true || (false && true)) || false && true;
+    c: bool = 1 < 2 && 1 < 2;
+    return 23.4;
+}
+fun main() {
+    print_hello();
+}

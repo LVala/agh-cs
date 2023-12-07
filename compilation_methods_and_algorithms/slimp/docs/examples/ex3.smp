@@ -1,0 +1,11 @@
+fun main(values_dict: int): () {
+    if true {
+        vos: char = 'a';
+        print(vos);
+    } else {
+        vos: char = 'b';
+        print(vos);
+    }
+    vos: char = 'c';
+    print(vos);
+}

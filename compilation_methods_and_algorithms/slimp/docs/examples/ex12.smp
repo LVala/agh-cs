@@ -1,0 +1,13 @@
+a: int = 1;
+fun main() : int {
+    a: int = 2;
+    print(@parent a, a, "\n");
+    if true {
+        if true {
+            print(@parent a, a, "\n");
+            a: int = 15;
+            print(@parent a, a, "\n");
+        }
+    }
+    return 0;
+}

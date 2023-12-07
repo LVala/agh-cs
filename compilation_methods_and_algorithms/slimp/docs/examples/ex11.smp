@@ -1,0 +1,10 @@
+fun acb() {
+    if true {
+        a: bool = true;
+        print("asd", "sa", 34, a);
+    }
+}
+
+fun main() {
+    acb();
+}

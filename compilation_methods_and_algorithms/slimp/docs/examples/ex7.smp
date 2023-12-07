@@ -1,0 +1,6 @@
+fun main(): () {
+    list: [int; 5] = [1..5];
+    for i <- list {
+        print(i);
+    }
+}

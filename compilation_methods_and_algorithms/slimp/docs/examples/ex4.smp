@@ -1,0 +1,2 @@
+fun cos(a: int, b: float): () {}
+fun main(): int {}

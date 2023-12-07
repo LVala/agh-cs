@@ -1,0 +1,8 @@
+fun main() {
+    list: [int; 5] = [1..5];
+    i: int = 5;
+    while true {
+        i = i + 1;
+        print(i);
+    }
+}

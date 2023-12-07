@@ -1,0 +1,6 @@
+
+fun main() {
+    e: int = -((54 - 34) * 44342) + (1.0 as int) + (true as int); # comment
+
+    print(e);
+}

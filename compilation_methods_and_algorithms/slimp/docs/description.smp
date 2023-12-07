@@ -1,0 +1,91 @@
+# imperative programming language
+# statically, strongly typed (no automatic type conversion)
+# basic pattern matching features
+# tool: transpiler to C
+
+# simple data types: int, float, char, bool
+# data structures: krotka, lista, mapa, string
+
+# arithmetic and logical operations, comparison - in examples
+
+# scope -  local, global, similar to C
+# start point - main function
+
+# control flow - in examples
+
+# examples - below and in ./examples/ subdirectory
+
+# this is a comment
+# variables - local or global
+x: int = 5;
+x: char = 'c';
+x: bool = true;
+x: bool = false;
+
+# arithmetic operations
+x: int = 12;
+y: int = 25;
+x + x;
+x - x;
+x * x;
+x // x;  # integer division
+x * (x + x);
+
+# comparison
+x < x;
+x > x;
+x == x;
+x != x;
+
+# logical operations
+a: bool = false;
+b: bool = true;
+a && b
+a || b
+!b
+
+
+# control flow
+
+b: bool = true;
+
+if x == 5 {
+    print("abc");
+} else if {
+
+} else {
+
+}
+
+for i <- [1, 2, 3] {
+    print(i);
+}
+
+fun recursive(x: int, b: bool): int {
+    if x == 3 {
+        return 8921;
+    }
+    else {
+        return recursive(3, 5);
+    }
+}
+
+while true {
+    break;
+}
+
+# pattern matching and data structures
+
+list: [int] = [1..10];
+tuple:  (int, char, bool) = (1, 'c', true);
+map: { int -> char } = {2 -> 'c', 3 -> 'e'};
+
+(a: int, b: bool, c: char) = (1, true, 'c');
+
+(_, b: bool, 'c') = (1, true, 'c');
+print(b); # true
+
+a: {int -> (char, bool)} = {21 -> ('j', true), 37 -> ('p', false)};
+{21 -> _, 37 -> (value: char, false)} = a;
+
+print(value);  # 'p'
