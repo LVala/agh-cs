@@ -1,0 +1,7 @@
+wavetable.c:9:14:PitchToFreq	1
+wavetable.c:13:13:SineWavetableInit	2
+wavetable.c:22:13:SawWavetableInit	4
+wavetable.c:35:6:Wavetable_Init	2
+wavetable.c:50:6:Wavetable_NoteOn	1
+wavetable.c:57:6:Wavetable_NoteOff	2
+wavetable.c:66:6:Wavetable_GetSamples	3

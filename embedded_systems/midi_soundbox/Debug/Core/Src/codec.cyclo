@@ -1,0 +1,6 @@
+codec.c:8:9:Codec_Write	1
+codec.c:16:10:Codec_Init	1
+codec.c:46:10:Codec_Play	2
+codec.c:60:10:Codec_Stop	1
+codec.c:72:10:Codec_SetVolume	3
+codec.c:87:10:Codec_SetMute	2

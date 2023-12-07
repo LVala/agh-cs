@@ -1,0 +1,6 @@
+../Core/Src/codec.c:8:9:Codec_Write	40	static
+../Core/Src/codec.c:16:10:Codec_Init	16	static
+../Core/Src/codec.c:46:10:Codec_Play	16	static
+../Core/Src/codec.c:60:10:Codec_Stop	16	static
+../Core/Src/codec.c:72:10:Codec_SetVolume	24	static
+../Core/Src/codec.c:87:10:Codec_SetMute	24	static

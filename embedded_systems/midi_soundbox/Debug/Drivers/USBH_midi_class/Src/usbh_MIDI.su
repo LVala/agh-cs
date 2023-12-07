@@ -1,0 +1,13 @@
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:76:27:USBH_MIDI_InterfaceInit	48	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:170:20:USBH_MIDI_InterfaceDeInit	24	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:206:27:USBH_MIDI_ClassRequest	16	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:222:21:USBH_MIDI_Stop	24	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:245:27:USBH_MIDI_Process	24	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:289:27:USBH_MIDI_SOFProcess	16	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:301:10:USBH_MIDI_GetLastReceivedDataSize	24	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:322:21:USBH_MIDI_Transmit	32	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:348:21:USBH_MIDI_Receive	32	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:374:13:MIDI_ProcessTransmission	32	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:455:13:MIDI_ProcessReception	24	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:519:13:USBH_MIDI_TransmitCallback	16	static
+../Drivers/USBH_midi_class/Src/usbh_MIDI.c:530:13:USBH_MIDI_ReceiveCallback	16	static
