@@ -1,0 +1,135 @@
+\documentclass{article}
+
+\usepackage{polski}
+\usepackage{hyperref}
+
+\title{Room heating simulation - harmonogram}
+\author{\textbf{Damian Tworek, Kamil Miśkowiec} \\ \textbf{Jan Ziętek, Łukasz Wala}\\
+    \textit{AGH, Wydział Informatyki, Elektroniki i Telekomunikacji} \\
+    \textit{Modelowanie Systemów Dyskretnych 2021/2022}}
+\date{Kraków, \today}
+
+\begin{document}
+\maketitle
+
+\section{Idea projektu}
+Projekt polega na stworzeniu symulacji ogrzewania pomieszczenia. Na podstawie symulacji wyciągnięte zostaną
+wnioski dotycznące najbardziej opłacalnej strategii ogrzewania pomieszczeń. 
+
+Podstawą symulacji będzie trójwymiarowy automat komórkowy działający na podstawie wybranego modelu dynamiki termicznej,
+opierający się przede wszystkim na przewodnictwie cieplnym (możliwość uwzględnienie np. konwekcji czy promieniowania, wilgotność powietrza,
+przepływ powietrza raczej nie zostanie uwzględniony ze względu na poziom skomplikowania).
+Będzie on również uwzględniał takie elementy jak: przenikalność cieplna elementów takich jak ściany, podłoga, sufit, okna, do tego temperaturę
+otoczenia poza pomiesczeniem (na zewnątrz, u sąsiadów, jeżeli to np. pomieszczenie w bloku), źródła ciepła: grzejniki, ludzi znajdujących
+się w pomieszczeniu.
+
+\section{Harmonogram}
+\subsection{Zajęcia 04.05.2022}
+
+\begin{itemize}
+    \item
+    Wybór technologii użytej do wizualizacji automatu komórkowego.
+    \item
+    Podstawowa implementacja warstwy wizualizacyjnej.
+    \item
+    Specyfikacja użytego modelu uproszczonej dynamiki termicznej.
+\end{itemize}
+
+\subsection{Zajęcia 11.05.2022}
+
+\begin{itemize}
+    \item
+    Implementacja używanego modelu dynamiki termicznej.
+    \item
+    Początek implementacji obiektów bedących elementami symulowanego pomieszczenia, np. ściany, grzejnik, okna.
+\end{itemize}
+
+\subsection{Zajęcia 18.05.2022}
+
+\begin{itemize}
+    \item
+    Dokończenie implementacji elementów pomieszcznia.
+    \item
+    Implementacja interaktywnej możliwość edycji parametrów symulacji.
+\end{itemize}
+
+\subsection{Zajęcia 25.05.2022}
+
+\begin{itemize}
+    \item
+    Poprawki oraz ostateczne usprawnienie symulacji oraz jej wizualizacji.
+    \item
+    Implementacja mechnizmów kolekcjonujących dane z symulacji.
+    \item
+    Wykonanie symulacji z różnymi paramatrami oraz zebranie danych.
+\end{itemize}
+
+\subsection{Zajęcia 01.06.2022}
+
+\begin{itemize}
+    \item
+    Analiza wyników, weryfikacja oraz sformuowanie wniosków.
+    \item
+    Oddanie projektu oraz przedstawienie uzyskanych wniosków.
+\end{itemize}
+
+\section{Literatura}
+
+\begin{enumerate}
+    \item
+    Jarosław Wąs, Artur Karp, Szymon Łukasik, Dariusz Pałka \textit{Modeling of Fire Spread Including Different 
+    Heat Transfer Machanisms Using Cellular Automata}
+
+    Ta praca traktuje o rozprzestrzenianiu się ognia, jednak można z niej zaczerpnąć kilka wartościowych informacji
+    istotnych dla projektu, jak rodzaj sąsiedztwa dla automatu trójwymiarowego dla sześciennych komórek. 
+    W projekcie zostanie zastosowane sąsiedztwo zawierające 6 komórek przylegających ścianami. Inne, odrzucone możliwości
+    to komórki współdzielące krawędzie lub komórki współdzielące wierzchołki, jednak z powodów opisanych w pracy zostały odrzucone. 
+    Do tego praca specyfikuje wzory opisujące zjawisko konwekcji.
+
+    \item
+    Purvesh Bharadawaj, Ljubomir Jankovic \textit{Cellular Automata Simulation of Three-dimensional Building Heat Loss}
+
+    Z tej pracy zaczerpnięty został podział typów agentów odpowiadający elementom o różnych własnościach termodynamicznych 
+    (powietrze, ściany, okna, izolacja, źródła ciepła).
+
+    Również na podstawie tej oraz poprzedniej pracy stworzony został model przewodnictwa cieplnego oparty na prawie Fouriera,
+    przystosowany do użycia w automacie komórkowym:
+
+    Dla pewnej komórki $i$ przepływ ciepła można opisać równaniem
+    \begin{equation}
+    \displaystyle Q=-\sum_{j \in O(i)}k\frac{\Delta T_j}{\Delta l}A
+    \end{equation}
+
+    Gdzie,\\
+    $O(i)$ - zbiór sąsiadó komórki $i$, \\
+    $Q$ - przepływ ciepła (W), \\
+    $k$ - przewodnictwo cieplne (W/(m$\cdot$K)), \\
+    $\Delta T_i$ - różnica temperatur pomiędzy komórką $i$ a jej sąsiadem $j$ (K), \\
+    $l$ - odległość środkami komórek (m), \\
+    $A$ - pole powierzchni wymiany (m$^2$). \\
+    
+    Następnie temperaturę komórki można obliczyć ze wzrou
+
+    \begin{equation}
+    T=\frac{Q}{\rho V c}
+    \end{equation}
+
+    Gdzie, \\
+    $Q$ - przepływ ciepła (W), \\
+    $\rho$ - gęstość (kg/m$^3$), \\
+    $V$ - objętość (m$^3$), \\
+    $c$ - ciepło właściwe (K/(Kg$\cdot$K))
+
+    \item
+    Sergey Bobkov, Edward Galiaskarov, Irina Astrakhantseva \textit{The use of cellular automata systems for
+    simulation of transfer processes in a non-uniform area}
+
+    \item
+    Sergey Bobkov \textit{Cellular Automata Systems application for simulation of some processes in solids}
+
+    Dwie ostatnie pozycje zawierają alternatywne podejście do problemu, które może być przydatne podczas walidacji modelu lub
+    jeżeli w trakcie tworzenia okaże się, że wybrany model jest w jakiś sposób niepoprawny.
+\end{enumerate}
+
+
+\end{document}  

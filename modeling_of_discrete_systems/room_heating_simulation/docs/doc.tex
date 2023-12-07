@@ -1,0 +1,176 @@
+\documentclass{article}
+
+\usepackage{polski}
+\usepackage{hyperref}
+\usepackage{amssymb}
+\usepackage{gensymb}
+
+\title{Room heating simulation}
+\author{\textbf{Damian Tworek, Kamil Miśkowiec} \\ \textbf{Jan Ziętek, Łukasz Wala}\\
+    \textit{AGH, Wydział Informatyki, Elektroniki i Telekomunikacji} \\
+    \textit{Modelowanie Systemów Dyskretnych 2021/2022}}
+\date{Kraków, \today}
+
+\begin{document}
+\maketitle
+
+\section{Wstęp}
+Ten projekt prezentuje metodę modelowania procesu rozprzestrzeniania się ciepła w pomieszczeniu z użyciem
+trójwymiarowego automatu komórkowego, który efektywnym, jednak uproszczonym rozwiązaniem. 
+Model bazowany jest na dwóch zjawiskach: przewodnictwie cieplnym oraz konwekcji.
+Uwzględnia on również wpływ materiałów, ze których zbudowane są ściany, sufit itp., czynników takich jak temperatura na
+zewnątrz.
+
+\section{Mechanizmy wymiany ciepła}
+\subsection{Przewodzenie cieplne}
+Energia przepływająca w skutek przewodnictwa cieplnego może być opisana prawem Fouriera. Jego postać różniczkowa to
+$$q=-k\triangledown T$$
+gdzie:
+\begin{itemize}
+    \item 
+    $q$ --- gęstość strumienia ciepła (ang. \textit{heat flux density}, $\frac{W}{m^2}$),
+    \item
+    $k$ --- przewodność cieplna ($\frac{W}{m\cdot K}$),
+    \item
+    $\triangledown T$ --- gradient temperatury ($\frac{K}{m}$).
+\end{itemize}
+
+\subsection{Konwekcja}
+Konwekcja jest procesem przepływu ciepła w skutek poruszania się cieczy lub gazu. Może być opisana przy pomocy
+prawa stygnięcia (Newtona)
+$$\frac{Q}{dt}=hA(T_o - T_s)$$
+gdzie:
+\begin{itemize}
+    \item 
+    $Q$ --- przekazywane ciepło ($J$),
+    \item
+    $dt$ --- przyrost czasu ($s$),
+    \item
+    $h$ --- współczynnik konwekcji ($\frac{W}{m^2 \cdot K}$),
+    \item
+    $A$ --- powierzchnia ($m^2$),
+    \item
+    $T_o - T_s$ --- różnica temperatur pomiędzy obiektem oraz cieczą/gazem ($K$).
+\end{itemize}
+
+\section{Model}
+\subsection{Sąsiedztwo}
+Zastosowanym modelem sąsiedztwa dla trójwymiarowej tablicy reprezentującej pomieszcenie będzie sąsiedztwo z komórkami
+wspódzielącymi ściany, to znaczy że zbiór sąsiadów $S$ komórki $k$ o współrzędnych $a,b,c$ jest następujący
+$$S_{a,b,c}=\{k_{a-1,b,c}, k_{a+1,b,c}, k_{a,b-1,c}, k_{a,b+1,c}, k_{a,b,c-1}, k_{a,b,c+1}, \}$$
+z wyjątkiem komórek na granicach tablicy, których zbiory sąsiadów są odpowiednio pomniejszone o nieistniejące komórki.
+
+\subsection{Przewodzenie cieplne}
+Zgodnie z prawem Fouriera dla przypadku jednowymiarowego, wówczas z uwzględnieniem wszystkich sąsiadów
+wzór na przekazane ciepło
+\begin{equation}
+    \displaystyle Q=-\sum_{j \in S(i)}k\frac{\Delta T_j}{\Delta l}A
+    \end{equation}
+gdzie,\\
+$S(i)$ --- zbiór sąsiadó komórki $i$, \\
+$Q$ --- przepływ ciepła ($W$), \\
+$k$ --- przewodnictwo cieplne ($\frac{W}{m \cdot K}$), \\
+$\Delta T_i$ --- różnica temperatur pomiędzy komórką $i$ a jej sąsiadem $j$ (K), \\
+$l$ --- odległość środkami komórek ($m$), \\
+$A$ --- pole powierzchni wymiany ($m^2$). \\
+
+Następnie temperaturę komórki można obliczyć ze wzoru
+
+\begin{equation}
+T=\frac{Q}{\rho V c}
+\end{equation}
+
+gdzie, \\
+$Q$ --- przepływ ciepła ($W$), \\
+$\rho$ --- gęstość ($\frac{kg}{m^3}$), \\
+$V$ --- objętość ($m^3$), \\
+$c$ --- ciepło właściwe ($\frac{K}{Kg\cdot K}$)
+
+\subsection{Konwekcja}
+Przy konwekcji uwzględniane są tylko wartości górnego oraz dolnego sąsiada komórki $i$, wówczas zależność opisana jest wzorem
+\begin{equation}
+Q= -hA dt ((T_i - T_g) + (T_i - T_d))
+\end{equation}
+gdzie,
+$Q$ --- przepływ ciepła ($W$), \\
+$h$ --- współczynnik konwekcji, \\
+$A$ --- powierzchnia styku komórek ($m^2$), \\
+$dt$ --- przyrost czasu ($s$), \\
+$T_i$, $T_g$, $T_d$ --- temperatury kolejno badanej komórki, górnego i dolnego sąsiada ($K$).
+
+Przepływ ciepła występuje jednak tylko przy założeniu, że temperatura komórki dolnej jest większa niż komórki badanej (analogicznie
+temperatura komórki badanej jest większa niż komórki górnej). Również w momencie, kiedy ciepło dotrze pod sufit, tzn. nie ma nad
+nim więcej komórek z powietrzem, zaczyna się rozchodzić na boki, co ma symulować wypychanie powietrza zimnego z pod sufitu. 
+Następnie można użyć wzoru \textbf{2} do obliczenia temperatury.
+
+\subsection{Przepływ ciepła przez ściany, okna itp.}
+Powyższe metody opisują zachowanie w obszarze komórek o typie powietrza, natomiast symulacja uwzględnia również:
+\begin{itemize}
+    \item 
+    ściany, sufity, podłogi, okna o różnych właściwościach termoprzewodzących,
+    \item
+    źródło ciepła, np. grzejnik.
+\end{itemize}
+
+Temperatura tych obszarów nie jest wyliczana, jednak mają one istotny wpływ na ilość ciepła uciekającego z pomieszczenia, jak
+i pojawiającego się w nim. Oczywistym podejściem byłoby zamodelowanie np. ścian o adekwatnej grubości (składających się 
+z pewnej liczby warstw komórek) i modelowania procesów wewnątrz nich. Innym, zbadanym i prostszym rozwiązaniem jest wykorzystanie
+zjawiska przepuszczalności cieplnej (ang. \textit{thermal transmittance}), dzięki której do zamodelowania ściany wystarczy
+jedna warstwa komórek, która symuluje ścianę wielowarstwową dzięki wykorzystaniu odpowiedniego współczynnika \textit{u-value}.
+
+\begin{equation}
+Q = -AU(T_p-T_m)dt
+\end{equation}
+gdzie,
+$Q$ --- przepływ ciepła ($W$), \\
+$A$ --- powierzchnia styku komórek ($m^2$), \\
+$U$ --- \textit{u-value}, \\
+$dt$ --- przyrost czasu ($s$), \\
+$T_p$, $T_m$ --- temperatury kolejno badanej komórki z powietrzem, sąsiada o innym typie ($K$).
+
+Analogicznie, do obliczenia temperatury można użyć wzoru \textbf{2}.
+
+\section{Walidacja modelu}
+Pierwszym, najmniej formalnym krokiem walidacji, było przetestowanie pewnych scenariuszy oraz ich skutków, np.:
+\begin{itemize}
+    \item
+    Przy stałym ogrzewaniu, współczynnikach przenikalności cieplnej ścian i temperaturze zewnątrznej, po pewnym czasie temepratura
+    w pomieszczeniu stablizuje się, a jej jest zgodna z intuicją (np. ok 20$\degree$C przy źródle ciepła o temperaturze 60$\degree$C i 
+    temperaturze na zewnątrz rzędu kilku-kilkunastu $\degree$C).
+    \item 
+    Porównanie prób, gdzie w jednej temperatura na zewnątrz wynosiła 15$\degree$C z próbą, gdzie wynosiła 0$\degree$C. Po pewnym czasie,
+    gdy temperatura w pomieszczeniu przy stałym ogrzewaniu stablizuje się, w próbie z mniejszą temperaturą na zewnątrz jest ona mniejsza.
+    \item
+    Zastosowanie nierealistycznie niskich wartości przenikalności cieplnej ścian, podłogi itd. skutkuje bardzo wyskoą temperaturą
+    wewnątrz pomieszczenia, ponieważ, zgodnie przypuszczeniami, ciepło jest w układzie bardzo dobrze izolowanym i nie może z niego uciec.
+    \item
+    Zastosowanie podobnego scenariusza jak powyższy, z tą różnicą, że wspólczynniki prznikalności okien są na realistycznym poziomie
+    skutowało obszarem chłodniejszego powietrza w okolicy okna. 
+
+\end{itemize}
+
+
+\section{Wnioski}
+Celem projektu było stworzenie modelu, który symulowałby rozprzesztrzenianie się ciepła w pomieszczeniu za pomocą automatu komórkowego.
+Stworzony model uwzględnia zjawiska przewodnictwa cieplnego wewnątrz powietrza oraz na granicach powietrze-materiał, 
+co pozwala uwzględnić stopień izolacji cieplnej pomieszczenia. Model uwzględnia również proces konwekcji. Wykorzystanie automatu komórkowego
+zapewnia bardzo dobrą efektywność symulacji.
+
+Cel ten został osiągnięty w pewnym stopniu, model posiada kilka niedoskonałości, np. brak promieniowania cieplnego
+oraz niedokładne odtworzenie procesu konwekcji, jednak mimo tego pozwala z pewnym przybliżeniem przewidzieć symulowany proces, wyniki symulacji
+nie odbiegają bardzo od danych porównawczych, co oznacza, że przy dalszym rozwoju, model mógłby prezentować dobrą skuteczność.
+
+
+
+\section{Źródła}
+\begin{enumerate}
+    \item
+    Jarosław Wąs, Artur Karp, Szymon Łukasik, Dariusz Pałka: \textit{Modeling of Fire Spread Including Different 
+    Heat Transfer Machanisms Using Cellular Automata},
+    \item
+    Purvesh Bharadawaj, Ljubomir Jankovic: \textit{Cellular Automata Simulation of Three-dimensional Building Heat Loss},
+    \item
+    Philip Kosky, Robert Balmer, William Keat, George Wise: \textit{Exploring Engineering},
+\end{enumerate}
+
+\end{document}
